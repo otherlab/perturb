@@ -1,0 +1,156 @@
+\documentclass[11pt]{article}
+\usepackage{amsfonts,amssymb,amsthm,eucal,amsmath}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{latexsym,url}
+\usepackage{array}
+\usepackage{subfig}
+\usepackage{comment}
+\usepackage{color}
+
+\newcommand{\myspace}{\vspace{.1in}\noindent}
+\newcommand{\mymyspace}{\vspace{.1in}}
+\usepackage[inner=30mm, outer=30mm, textheight=225mm]{geometry}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{prop}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{defn}[theorem]{Definition}
+\newtheorem{notn}[theorem]{Notation}
+\newtheorem{cond}[theorem]{Condition}
+\newtheorem{ex}[theorem]{Example}
+\newtheorem{rmk}[theorem]{Remark}
+\newcommand{\co}{\negthinspace :}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\CP}{\mathbb{CP}}
+\newcommand{\PSL}{\mathrm{PSL}_2(\mathbb{C})}
+\newcommand{\area}{\operatorname{area}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\nt}{\negthinspace}
+\newcommand{\TODO}{{\color{red} TODO}}
+
+\title{A practical deterministic pseudorandom symbolic perturbation scheme for arbitrary polynomial predicates}
+\author{Geoffrey Irving\thanks{Email: irving@naml.us, Otherlab, San Francisco, CA, United States}
+\and Forrest Green\thanks{\TODO}}
+\date{Version 1, \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present a symbolic perturbation scheme for arbitrary polynomial geometric predicates, which combines the benefits of
+Seidel's simple randomized linear perturbation scheme with Yap's multiple infinitesimal scheme for general predicates.
+Like Seidel's randomized scheme, our method accepts black box polynomial functions as input.
+For nonmaliciously chosen predicates, the algorithm is as fast as Seidel's scheme, and in particular scales linearly
+with the degree of the polynomial even for fully degenerate input.  Like Yap's scheme, the computed sign is deterministic,
+thus never requires an algorithmic restart (assuming a high quality pseudorandom generator), and works for arbitrary
+predicates with no knowledge of their structure.  We also apply our technique to exactly or nearly exactly rounded
+constructions that work correctly for degenerate input, using iterated l'H\^opital's rule to compute the necessary
+singular limits.
+\end{abstract}
+
+\section{Circular arc predicates}
+
+Let's work out all the predicates we need for circular arc booleans in the plane.  Let $S_i = (c_i,r_i)$ be the $i$th
+circle with center $c_i$ and radius $r_i$.  Circles $S_0$ and $S_1$ intersect iff
+$$ | r_1 - r_0 | < |c_1 - c_0| < r_1 + r_0. $$
+Since all quantities are positive, we can square to get
+\begin{align} \label{two-circles}
+(r_1 - r_0)^2 < (c_1 - c_0) \cdot (c_1 - c_0) < (r_1 + r_0)^2
+\end{align}
+where both inequalities are degree two polynomial predicates.
+
+Now consider three circles $C_0,C_1,C_2$, where $C_0,C_1$ intersect.  Define the intersection point $x_{01}$ as the intersection
+of $C_0,C_1$ to the left of line $c_0c_1$.  We have
+\begin{align*}
+x_{01} &= (1-\alpha) c_0 + \alpha c_1 + \beta \Delta c^\perp \\
+(x_{01} - c_i)^2 &= r_i^2 \\
+x_{01}^2 - 2x_{01} \cdot c_i + c_i^2 = r_i^2.
+\end{align*}
+Subtracting the two circle equations gives
+\begin{align*}
+-2x_{01} \cdot \Delta c + c_1^2 - c_0^2 = r_1^2 - r_0^2 \\
+-2c_0 \cdot \Delta c -2\alpha {\Delta c}^2 + (c_0 + c_1) \cdot \Delta c &= r_1^2 - r_0^2 \\
+(1-2\alpha) {\Delta c}^2 &= r_1^2 - r_0^2 \\
+1 - 2 \alpha &= \frac{r_1^2 - r_0^2}{\Delta c^2}
+\end{align*}
+Let
+$$\gamma = \frac{1 - 2\alpha}{2} = \frac{r_1^2 - r_0^2}{2\Delta c^2}$$
+so that $\alpha = 1/2 - \gamma$ and
+\begin{align*}
+x_{01} &= (1-1/2 + \gamma) c_0 + (1/2 - \gamma) c_1 + \beta \Delta c^\perp \\
+       &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp
+\end{align*}
+Substituting into $C_0$'s equation gives
+\begin{align*}
+(x_{01} - c_0)^2 &= r_0^2 \\
+\left((1/2 - \gamma) \Delta c + \beta \Delta c^\perp \right)^2 &= r_0^2 \\
+(1/2 - \gamma)^2 \Delta c^2 + \beta^2 \Delta c^2 &= r_0^2 \\
+\beta^2 &= \frac{r_0^2}{\Delta c^2} - (1/2 - \gamma)^2 \\
+\beta^2 &= \frac{r_0^2}{\Delta c^2} - \left(\frac{\Delta c^2 - r_1^2 + r_0^2}{2 \Delta c^2}\right)^2 \\
+4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \left( \Delta c^2 - r_1^2 + r_0^2 \right)^2
+\end{align*}
+To recap, the intersection between circles $S_0$ and $S_1$ is described by
+\begin{align*}
+x_{01} &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp \\
+\gamma \Delta c^2 &= r_1^2 - r_0^2 \\
+4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \left( \Delta c^2 - r_1^2 + r_0^2 \right)^2
+\end{align*}
+where $^\perp$ rotates left by $90^\circ$ and we choose the positive square root for $\beta$.
+Substituting into the equation for circle $S_2$ gives
+\begin{align*}
+(x_{01} - c_2)^2 &< r_2^2 \\
+(\bar{c} - \gamma \Delta c + \beta \Delta c^\perp - c_2)^2 &< r_2^2 \\
+u &= \bar{c} - c_2 \\
+u^2 - \gamma^2 \Delta c^2 + \beta^2 \Delta c^2 - 2\gamma u \cdot \Delta c + 2\beta u \times \Delta c &< r_2^2 \\
+u^2 - \gamma^2 \Delta c^2 + \beta^2 \Delta c^2 - 2\gamma u \cdot \Delta c - r_2^2 &< -2\beta u \times \Delta c
+\end{align*}
+The LHS involves a few fractions, which we clear by multiplying the entire equation by $4\Delta c^2$:
+\begin{align*}
+4u^2 \Delta c^2 - 4\gamma^2 \Delta c^4 + 4\beta^2 \Delta c^4 - 8\gamma \Delta c^2 (u \cdot \Delta c) - 4 r_2^2 \Delta c^2 &< -8\beta \Delta c^2 (u \times \Delta c) \\
+v^2 \Delta c^2 - 4\gamma^2 \Delta c^4 + 4\beta^2 \Delta c^4 - 4\gamma \Delta c^2 (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 &< -4\beta \Delta c^2 (v \times \Delta c)
+\end{align*}
+where $v = 2u = c_0+c_1-2c_2$.
+The LHS is now an integer polynomial, but the RHS involves a positive square root.  Thus we first check the signs of the LHS and the non-sqrt portion of the RHS; if they differ, we
+are done.  If they are both positive, squaring preserves the $<$, and we have
+\begin{align} 
+\left( v^2 \Delta c^2 - 4\gamma^2 \Delta c^4 + 4\beta^2 \Delta c^4 - 4\gamma \Delta c^2 (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 \right)^2 &< 4 (4\beta^2 \Delta c^4) (v \times \Delta c)^2 \\
+\left( v^2 \Delta c^2 - 4(\gamma \Delta c^2)^2 + (4\beta^2 \Delta c^4) - 4(\gamma \Delta c^2) (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 \right)^2 &< 4 (4\beta^2 \Delta c^4) (v \times \Delta c)^2
+\label{three-circles}
+\end{align}
+which is an 8th degree integer polynomial in the centers and radii.  The both negative case is similar, but $<$ becomes $>$.
+
+Alternatively, given three circles $C_0, C_1, C_2$, we ask whether $x_{01}$ occurs to the right of $x_{02}$.  Equivalently, do we have
+\begin{align*}
+(x_{01} - c_0) \times (x_{02} - c_0) &> 0 \\
+((1/2 - \gamma_1) \Delta c_1 + \beta_1 \Delta c_1^\perp) \times (1/2 - \gamma_2) \Delta c_2 + \beta_2 \Delta c_2^\perp) &> 0 \\
+(\alpha_1 \Delta c_1 + \beta_1 \Delta c_1^\perp) \times (\alpha_2 \Delta c_2 + \beta_2 \Delta c_2^\perp) &> 0 \\
+(\alpha_1 \alpha_2 + \beta_1 \beta_2) \Delta c_1 \times \Delta c_2 + (\alpha_1 \beta_2 - \beta_1 \alpha_2) \Delta c_1 \cdot \Delta c_2 &> 0
+\end{align*}
+Multiply through by $\Delta c_1^2 \Delta c_2^2$ to clear nonconstant fractions to get
+\begin{align} \label{circle-order}
+(\alpha'_1 \alpha'_2 + \beta'_1 \beta'_2) \Delta c_1 \times \Delta c_2 + (\alpha'_1 \beta'_2 - \beta'_1 \alpha'_2) \Delta c_1 \cdot \Delta c_2 &> 0 \\
+\alpha'_i &= \alpha_i \Delta c_i^2 = \Delta c_i^2 - r_i^2 + r_0^2 \\
+\beta'^2_i &= \beta_i^2 \Delta c_i^4
+\end{align}
+This has the form
+$$a_6 + a_4 \sqrt{b_4} + a_4 \sqrt{b_4} + a_2 \sqrt{b_4} \sqrt{b_4}$$
+where subscript $k$ denotes degree $k$.  This matches Lemma (5) from "On the Degree of Standard Geometric Predicates for Line Transversals in 3D", so the final predicate degree is 24.
+
+Finally, we need a much simpler version of (\ref{circle-order}) where the second direction is one of the coordinate axes, call it $e$:
+\begin{align*}
+e \times (x_{01} - c_0) &> 0 \\
+e \times (\alpha \Delta c + \beta \Delta c^\perp) &> 0 \\
+\alpha e \times \Delta c &> -\beta e \cdot \Delta c \\
+(\alpha \Delta c^2)^2 (e \times \Delta c)^2 &> (\beta^2 \Delta c^4) (e \cdot \Delta c)
+\end{align*}
+where the last equation is correct only for appropriate sign configurations.
+
+\section{Circular arc polygons}
+
+We claim (\ref{two-circles}) and (\ref{circle-order}) are sufficient to implement CSG on curves composed of piecewise circular arcs.  This is relatively obvious.
+
+\end{document}
