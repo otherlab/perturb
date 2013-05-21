@@ -52,19 +52,26 @@ constructions that work correctly for degenerate input, using iterated l'H\^opit
 singular limits.
 \end{abstract}
 
+\TODO: Mention that this stuff could be integrated into a library like CORE to work with arbitrary algebraic expressions.
+It would be worse from a black box perspective, but still useful.
+
 \section{Circular arc predicates}
+
+\subsection{Do two circles intersect?}
 
 Let's work out all the predicates we need for circular arc booleans in the plane.  Let $S_i = (c_i,r_i)$ be the $i$th
 circle with center $c_i$ and radius $r_i$.  Circles $S_0$ and $S_1$ intersect iff
-$$ | r_1 - r_0 | < |c_1 - c_0| < r_1 + r_0. $$
+$$ | r_1 - r_0 | < |\Delta c| < r_1 + r_0. $$
 Since all quantities are positive, we can square to get
 \begin{align} \label{two-circles}
-(r_1 - r_0)^2 < (c_1 - c_0) \cdot (c_1 - c_0) < (r_1 + r_0)^2
+(r_1 - r_0)^2 < \Delta c^2 < (r_1 + r_0)^2
 \end{align}
 where both inequalities are degree two polynomial predicates.
 
-Now consider three circles $C_0,C_1,C_2$, where $C_0,C_1$ intersect.  Define the intersection point $x_{01}$ as the intersection
-of $C_0,C_1$ to the left of line $c_0c_1$.  We have
+\subsection{One intersection of two circles}
+
+Given circles $S_0, S_1$, define the intersection point $x_{01}$ as the intersection
+of $S_0,S_1$ to the left of line $c_0c_1$.  We have
 \begin{align*}
 x_{01} &= (1-\alpha) c_0 + \alpha c_1 + \beta \Delta c^\perp \\
 (x_{01} - c_i)^2 &= r_i^2 \\
@@ -84,7 +91,7 @@ so that $\alpha = 1/2 - \gamma$ and
 x_{01} &= (1-1/2 + \gamma) c_0 + (1/2 - \gamma) c_1 + \beta \Delta c^\perp \\
        &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp
 \end{align*}
-Substituting into $C_0$'s equation gives
+Substituting into $S_0$'s equation gives
 \begin{align*}
 (x_{01} - c_0)^2 &= r_0^2 \\
 \left((1/2 - \gamma) \Delta c + \beta \Delta c^\perp \right)^2 &= r_0^2 \\
@@ -95,12 +102,17 @@ Substituting into $C_0$'s equation gives
 \end{align*}
 To recap, the intersection between circles $S_0$ and $S_1$ is described by
 \begin{align*}
-x_{01} &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp \\
-\gamma \Delta c^2 &= r_1^2 - r_0^2 \\
-4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \left( \Delta c^2 - r_1^2 + r_0^2 \right)^2
+x_{01} &= c_0 + \alpha \Delta c + \beta \Delta c^\perp \\
+       &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp \\
+\hat{\alpha} = 2 \alpha \Delta c^2 &= \Delta c^2 - r_1^2 + r_0^2 \\
+\hat{\gamma} = 2 \gamma \Delta c^2 &= r_1^2 - r_0^2 \\
+\hat{\beta}^2 = 4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \hat{\alpha}^2
 \end{align*}
 where $^\perp$ rotates left by $90^\circ$ and we choose the positive square root for $\beta$.
-Substituting into the equation for circle $S_2$ gives
+
+\subsection{Is the intersection of two circles inside a third?}
+
+Substituting $x_{01}$ into the equation for circle $S_2$ gives
 \begin{align*}
 (x_{01} - c_2)^2 &< r_2^2 \\
 (\bar{c} - \gamma \Delta c + \beta \Delta c^\perp - c_2)^2 &< r_2^2 \\
@@ -111,30 +123,28 @@ u^2 - \gamma^2 \Delta c^2 + \beta^2 \Delta c^2 - 2\gamma u \cdot \Delta c - r_2^
 The LHS involves a few fractions, which we clear by multiplying the entire equation by $4\Delta c^2$:
 \begin{align*}
 4u^2 \Delta c^2 - 4\gamma^2 \Delta c^4 + 4\beta^2 \Delta c^4 - 8\gamma \Delta c^2 (u \cdot \Delta c) - 4 r_2^2 \Delta c^2 &< -8\beta \Delta c^2 (u \times \Delta c) \\
-v^2 \Delta c^2 - 4\gamma^2 \Delta c^4 + 4\beta^2 \Delta c^4 - 4\gamma \Delta c^2 (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 &< -4\beta \Delta c^2 (v \times \Delta c)
+v^2 \Delta c^2 - \hat{\gamma}^2 + \hat{\beta}^2 - 2\hat{\gamma} (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 &< -4 \hat{\beta} (v \times \Delta c)
 \end{align*}
 where $v = 2u = c_0+c_1-2c_2$.
 The LHS is now an integer polynomial, but the RHS involves a positive square root.  Thus we first check the signs of the LHS and the non-sqrt portion of the RHS; if they differ, we
 are done.  If they are both positive, squaring preserves the $<$, and we have
 \begin{align} 
-\left( v^2 \Delta c^2 - 4\gamma^2 \Delta c^4 + 4\beta^2 \Delta c^4 - 4\gamma \Delta c^2 (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 \right)^2 &< 4 (4\beta^2 \Delta c^4) (v \times \Delta c)^2 \\
-\left( v^2 \Delta c^2 - 4(\gamma \Delta c^2)^2 + (4\beta^2 \Delta c^4) - 4(\gamma \Delta c^2) (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 \right)^2 &< 4 (4\beta^2 \Delta c^4) (v \times \Delta c)^2
+\left( v^2 \Delta c^2 - \hat{\gamma}^2 + \hat{\beta}^2 - 2\hat{\gamma} (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 \right)^2 &< 16 \hat{\beta}^2 (v \times \Delta c)^2
 \label{three-circles}
 \end{align}
 which is an 8th degree integer polynomial in the centers and radii.  The both negative case is similar, but $<$ becomes $>$.
 
-Alternatively, given three circles $C_0, C_1, C_2$, we ask whether $x_{01}$ occurs to the right of $x_{02}$.  Equivalently, do we have
+\subsection{Are the intersections of two circles with a third counterclockwise?}
+
+Alternatively, given three circles $S_0, S_1, S_2$, we ask whether $x_{01}$ occurs to the right of $x_{02}$.  Equivalently, do we have
 \begin{align*}
 (x_{01} - c_0) \times (x_{02} - c_0) &> 0 \\
-((1/2 - \gamma_1) \Delta c_1 + \beta_1 \Delta c_1^\perp) \times (1/2 - \gamma_2) \Delta c_2 + \beta_2 \Delta c_2^\perp) &> 0 \\
 (\alpha_1 \Delta c_1 + \beta_1 \Delta c_1^\perp) \times (\alpha_2 \Delta c_2 + \beta_2 \Delta c_2^\perp) &> 0 \\
 (\alpha_1 \alpha_2 + \beta_1 \beta_2) \Delta c_1 \times \Delta c_2 + (\alpha_1 \beta_2 - \beta_1 \alpha_2) \Delta c_1 \cdot \Delta c_2 &> 0
 \end{align*}
-Multiply through by $\Delta c_1^2 \Delta c_2^2$ to clear nonconstant fractions to get
+Multiply through by $4 \Delta c_1^2 \Delta c_2^2$ to clear nonconstant fractions to get
 \begin{align} \label{circle-order}
-(\alpha'_1 \alpha'_2 + \beta'_1 \beta'_2) \Delta c_1 \times \Delta c_2 + (\alpha'_1 \beta'_2 - \beta'_1 \alpha'_2) \Delta c_1 \cdot \Delta c_2 &> 0 \\
-\alpha'_i &= \alpha_i \Delta c_i^2 = \Delta c_i^2 - r_i^2 + r_0^2 \\
-\beta'^2_i &= \beta_i^2 \Delta c_i^4
+(\alpha'_1 \alpha'_2 + \beta'_1 \beta'_2) \Delta c_1 \times \Delta c_2 + (\alpha'_1 \beta'_2 - \beta'_1 \alpha'_2) \Delta c_1 \cdot \Delta c_2 &> 0
 \end{align}
 This has the form
 $$a_6 + a_4 \sqrt{b_4} + a_4 \sqrt{b_4} + a_2 \sqrt{b_4} \sqrt{b_4}$$
@@ -144,8 +154,9 @@ Finally, we need a much simpler version of (\ref{circle-order}) where the second
 \begin{align*}
 e \times (x_{01} - c_0) &> 0 \\
 e \times (\alpha \Delta c + \beta \Delta c^\perp) &> 0 \\
-\alpha e \times \Delta c &> -\beta e \cdot \Delta c \\
-(\alpha \Delta c^2)^2 (e \times \Delta c)^2 &> (\beta^2 \Delta c^4) (e \cdot \Delta c)
+e \times (\hat{\alpha} \Delta c + \hat{\beta} \Delta c^\perp) &> 0 \\
+\hat{\alpha} e \times \Delta c &> -\hat{\beta} e \cdot \Delta c \\
+\hat{\alpha}^2 (e \times \Delta c)^2 &> \hat{\beta}^2 (e \cdot \Delta c)
 \end{align*}
 where the last equation is correct only for appropriate sign configurations.
 
