@@ -55,6 +55,9 @@ singular limits.
 \TODO: Mention that this stuff could be integrated into a library like CORE to work with arbitrary algebraic expressions.
 It would be worse from a black box perspective, but still useful.
 
+\TODO: Talk about different alternatives for detecting perfectly degenerate predicates via polynomial identity testing.  This is a key debugging tool.  In general, one major advantage of symbolic perturbation is that code that works for random input is highly likely to work for arbitrary input, in a much stronger sense than is normally true.  This is somewhat related to polynomial identity testing, in fact.
+In detail, an algorithm is usually correct if it is correct for all semi-algebraic configurations of a relatively small number of points.  These test sets have strictly positive measure, so suitable random input will likely find them.
+
 \section{Circular arc predicates}
 
 \subsection{Do two circles intersect?}
