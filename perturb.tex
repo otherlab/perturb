@@ -58,6 +58,8 @@ It would be worse from a black box perspective, but still useful.
 \TODO: Talk about different alternatives for detecting perfectly degenerate predicates via polynomial identity testing.  This is a key debugging tool.  In general, one major advantage of symbolic perturbation is that code that works for random input is highly likely to work for arbitrary input, in a much stronger sense than is normally true.  This is somewhat related to polynomial identity testing, in fact.
 In detail, an algorithm is usually correct if it is correct for all semi-algebraic configurations of a relatively small number of points.  These test sets have strictly positive measure, so suitable random input will likely find them.
 
+\TODO: General question: what is the best way to extend symbolic perturbation to functions with sqrts while preserving the black box structure?  Automatic differentiation, probably.
+
 \section{Circular arc predicates}
 
 \subsection{Do two circles intersect?}
@@ -163,8 +165,77 @@ e \times (\hat{\alpha} \Delta c + \hat{\beta} \Delta c^\perp) &> 0 \\
 \end{align*}
 where the last equation is correct only for appropriate sign configurations.
 
+\subsection{Is one circle intersection above another?}
+
+Given four circles $S_0$ through $S_3$, is $x_{01}$ below $x_{23}$?  This predicate has the form
+\begin{align*}
+c_0^y + \alpha_{01} c_{01}^y + \beta_{01} c_{01}^x &< c_2^y + \alpha_{23} c_{23}^y + \beta_{23} c_{23}^x \\
+0 &< c_{02}^y + \alpha_{23} c_{23}^y - \alpha_{01} c_{01}^y + \beta_{23} c_{23}^x - \beta_{01} c_{01}^x \\
+0 &< 2 c_{02}^y c_{01}^2 c_{23}^2 + \hat{\alpha}_{23} c_{23}^y c_{01}^2 - \hat{\alpha}_{01} c_{01}^y c_{23}^2 + \hat{\beta}_{23} c_{23}^x c_{01}^2 - \hat{\beta}_{01} c_{01}^x c_{23}^2
+\end{align*}
+
+\subsection{Does the horizontal line through one circle intersection intersect another circle?}
+
+In other words, given circles $S_0, S_1, S_2$, do we have
+\begin{align*}
+c_2^y - r_2 &< c_0^y + \alpha c_{01}^y + \beta c_{01}^x < c_2^y + r_2 \\
+2 (c_{02}^y - r_2) c_{01}^2 &< \hat{\alpha} c_{01}^y + \hat{\beta} c_{01}^x < 2 (c_{02}^y + r_2) c_{01}^2
+\end{align*}
+
+\subsection{Is the intersection of a horizontal line through one circle intersection with another circle to the right of the first intersection?}
+
+Given three circles $S_0, S_1, S_2$, where the horizontal line through $x_{01}$ intersects $S_2$ at $p$, we ask whether $x_{01}^x < p^x$.  We have
+\begin{align*}
+p^y &= x_{01}^x \\
+(p - c_2)^2 &= r_2^2 \\
+(p^x - c_2^x)^2 + (x_{01}^y - c_2^y)^2 &= r_2^2 \\
+p^x - c_2^x &= s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2} \\
+p^x &= c_2^x + s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2}
+\end{align*}
+where $s = \pm 1$ depending on which intersection we're considering.  Our predicate is
+\begin{align*}
+x_{01}^x < c_2^x + s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2} \\
+x_{01}^x - c_2^x < s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2}
+\end{align*}
+Assuming both sides are positive, squaring gives
+\begin{align*}
+(x_{01}^x - c_2^x)^2 &< r_2^2 - (x_{01}^y - c_2^y)^2 \\
+(x_{01}^x - c_2^x)^2 + (x_{01}^y - c_2^y)^2 &< r_2^2 \\
+(x_{01} - c_2)^2 &< r_2^2 \\
+(\alpha c_{01} + \beta c_{01}^\perp - c_{02})^2 &< r_2^2 \\
+\alpha^2 c_{01}^2 + \beta^2 c_{01}^2 + c_{02}^2 - 2 \alpha c_{01} \cdot c_{02} + 2 \beta c_{01} \times c_{02} &< r_2^2 \\
+\hat{\alpha}^2 + \hat{\beta}^2 + 4 c_{02}^2 c_{01}^2 - 4\hat{\alpha} c_{01} \cdot c_{02} + 4 \hat{\beta} c_{01} \times c_{02} &< 4 r_2^2 c_{01}^2 \\
+4 r_0^2 c_{01}^2 + 4 c_{02}^2 c_{01}^2 - 4\hat{\alpha} c_{01} \cdot c_{02} + 4 \hat{\beta} c_{01} \times c_{02} &< 4 r_2^2 c_{01}^2 \\
+4 c_{01}^2 (r_0^2 + c_{02}^2 - r_2^2) - 4\hat{\alpha} c_{01} \cdot c_{02} + 4 \hat{\beta} c_{01} \times c_{02} &< 0 \\
+c_{01}^2 (r_0^2 + c_{02}^2 - r_2^2) - \hat{\alpha} c_{01} \cdot c_{02} + \hat{\beta} c_{01} \times c_{02} &< 0 
+\end{align*}
+
+\TODO: This is exactly the question of whether $x_{01}$ is inside $S_2$, and should be merged into that section.
+
+Before squaring, the sign of the LHS is given by
+\begin{align*}
+x_{01}^x - c_2^x &> 0 \\
+\alpha c_{01}^x + \beta c_{01}^y - c_2^x &> 0 \\
+\hat{\alpha} c_{01}^x + \hat{\beta} c_{01}^y - 2 c_2^x c_{01}^2 &> 0
+\end{align*}
+
+\subsection{Is the angle at an intersection counterclockwise?}
+
+Let $t_0, t_1$ be the counterclockwise tangents at intersection $x_{01}$.  The following are equivalent:
+\begin{align*}
+t_0 \times t_1 &> 0 \\
+(x_{01} - c_0)^\perp \times (x_{01} - c_1)^\perp &> 0 \\
+(x_{01} - c_0) \times (x_{01} - c_1) &> 0 \\
+(x_{01} - c_0) \times (c_0 - c_1) &> 0 \\
+(\alpha \Delta c + \beta \Delta c^\perp) \times \Delta c &< 0 \\
+\beta \Delta c^2 &> 0 \\
+\hat{\beta} &> 0
+\end{align*}
+
+Thus the angle is $> 180^\circ$ for the intersection to the left of segment $(c_0,c_1)$, $< 180^\circ$ for the intersection to the right.
+
 \section{Circular arc polygons}
 
-We claim (\ref{two-circles}) and (\ref{circle-order}) are sufficient to implement CSG on curves composed of piecewise circular arcs.  This is relatively obvious.
+Well, those are all the predicates we need for exact circular arc constructive solid geometry.  \TODO: Are those really all we needed?
 
 \end{document}
