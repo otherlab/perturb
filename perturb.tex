@@ -60,6 +60,22 @@ In detail, an algorithm is usually correct if it is correct for all semi-algebra
 
 \TODO: General question: what is the best way to extend symbolic perturbation to functions with sqrts while preserving the black box structure?  Automatic differentiation, probably.
 
+\section{Polynomial interpolation}
+
+\TODO: Probably leave this out, and just list references.
+
+The Vandermonde matrix required for polynomial interpolation admits a wonderful factorization, shown here for the degree 4 case:
+
+\begin{align*}
+\left(\begin{matrix}1 & x_{0} & x_{0}^{2} & x_{0}^{3}\\1 & x_{1} & x_{1}^{2} & x_{1}^{3}\\1 & x_{2} & x_{2}^{2} & x_{2}^{3}\\1 & x_{3} & x_{3}^{2} & x_{3}^{3}\end{matrix}\right)
+=& \left(\begin{matrix}1&0&0&0\\\frac{1}{x_{0}-x_{1}}&\frac{1}{x_{1}-x_{0}}&0&0\\0&\frac{1}{x_{1}-x_{2}}&\frac{1}{x_{2}-x_{1}}&0\\0&0&\frac{1}{x_{2}-x_{3}}&\frac{1}{x_{3}-x_{2}}\end{matrix}\right)^{-1} \\
+ & \left(\begin{matrix}1&0&0&0\\0&1&0&0\\0&\frac{1}{x_{0}-x_{2}}&\frac{1}{x_{2}-x_{0}}&0\\0&0&\frac{1}{x_{1}-x_{3}}&\frac{1}{x_{3}-x_{1}}\end{matrix}\right)^{-1} \\
+ & \left(\begin{matrix}1&0&0&0\\0&1&0&0\\0&0&1&0\\0&0&\frac{1}{x_{0}-x_{3}}&\frac{1}{x_{3}-x_{0}}\end{matrix}\right)^{-1} \\
+ & \left(\begin{matrix}1&x_{0}&0&0\\0&1&x_{1}&0\\0&0&1&x_{2}\\0&0&0&1\end{matrix}\right) \\
+ & \left(\begin{matrix}1&0&0&0\\0&1&x_{0}&0\\0&0&1&x_{1}\\0&0&0&1\end{matrix}\right) \\
+ & \left(\begin{matrix}1&0&0&0\\0&1&0&0\\0&0&1&x_{0}\\0&0&0&1\end{matrix}\right) 
+\end{align*}
+
 \section{Circular arc predicates}
 
 \subsection{Do two circles intersect?}
@@ -120,24 +136,17 @@ where $^\perp$ rotates left by $90^\circ$ and we choose the positive square root
 Substituting $x_{01}$ into the equation for circle $S_2$ gives
 \begin{align*}
 (x_{01} - c_2)^2 &< r_2^2 \\
-(\bar{c} - \gamma \Delta c + \beta \Delta c^\perp - c_2)^2 &< r_2^2 \\
-u &= \bar{c} - c_2 \\
-u^2 - \gamma^2 \Delta c^2 + \beta^2 \Delta c^2 - 2\gamma u \cdot \Delta c + 2\beta u \times \Delta c &< r_2^2 \\
-u^2 - \gamma^2 \Delta c^2 + \beta^2 \Delta c^2 - 2\gamma u \cdot \Delta c - r_2^2 &< -2\beta u \times \Delta c
+(c_0 + \alpha c_{01} + \beta c_{01}^\perp - c_2)^2 &< r_2^2 \\
+(\alpha c_{01} + \beta c_{01}^\perp - c_{02})^2 &< r_2^2 \\
+\alpha^2 c_{01}^2 + \beta^2 c_{01}^2 + c_{02}^2 - 2 \alpha c_{01}\cdot c_{02} - 2 \beta c_{01}\times c_{02} &< r_2^2 \\
+4\alpha^2 c_{01}^4 + 4\beta^2 c_{01}^4 + 4c_{01}^2 c_{02}^2 - 8 \alpha c_{01}^2 c_{01}\cdot c_{02} - 8 \beta c_{01}^2 c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
+\hat{\alpha}^2 + \hat{\beta}^2 + 4c_{01}^2 c_{02}^2 - 4 \hat{\alpha} c_{01}\cdot c_{02} - 4 \hat{\beta} c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
+4 r_0^2 c_{01}^2 + 4 c_{01}^2 c_{02}^2 - 4 \hat{\alpha} c_{01}\cdot c_{02} - 4 \hat{\beta} c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
+r_0^2 c_{01}^2 + c_{01}^2 c_{02}^2 - \hat{\alpha} c_{01}\cdot c_{02} - \hat{\beta} c_{01}\times c_{02} &< r_2^2 c_{01}^2 \\
+c_{01}^2 (c_{02}^2 + r_0^2 - r_2^2) - \hat{\alpha} c_{01}\cdot c_{02} - \hat{\beta} c_{01}\times c_{02} &< 0 \\
+\hat{\alpha}_{02} c_{01}^2 - \hat{\alpha}_{01} c_{01}\cdot c_{02} - \hat{\beta}_{01} c_{01}\times c_{02} &< 0 \\
+\hat{\alpha}_{01} c_{01}\cdot c_{02} - \hat{\alpha}_{02} c_{01}^2 + \hat{\beta}_{01} c_{01}\times c_{02} &> 0 \\
 \end{align*}
-The LHS involves a few fractions, which we clear by multiplying the entire equation by $4\Delta c^2$:
-\begin{align*}
-4u^2 \Delta c^2 - 4\gamma^2 \Delta c^4 + 4\beta^2 \Delta c^4 - 8\gamma \Delta c^2 (u \cdot \Delta c) - 4 r_2^2 \Delta c^2 &< -8\beta \Delta c^2 (u \times \Delta c) \\
-v^2 \Delta c^2 - \hat{\gamma}^2 + \hat{\beta}^2 - 2\hat{\gamma} (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 &< -4 \hat{\beta} (v \times \Delta c)
-\end{align*}
-where $v = 2u = c_0+c_1-2c_2$.
-The LHS is now an integer polynomial, but the RHS involves a positive square root.  Thus we first check the signs of the LHS and the non-sqrt portion of the RHS; if they differ, we
-are done.  If they are both positive, squaring preserves the $<$, and we have
-\begin{align} 
-\left( v^2 \Delta c^2 - \hat{\gamma}^2 + \hat{\beta}^2 - 2\hat{\gamma} (v \cdot \Delta c) - 4 r_2^2 \Delta c^2 \right)^2 &< 16 \hat{\beta}^2 (v \times \Delta c)^2
-\label{three-circles}
-\end{align}
-which is an 8th degree integer polynomial in the centers and radii.  The both negative case is similar, but $<$ becomes $>$.
 
 \subsection{Are the intersections of two circles with a third counterclockwise?}
 
@@ -201,16 +210,9 @@ Assuming both sides are positive, squaring gives
 \begin{align*}
 (x_{01}^x - c_2^x)^2 &< r_2^2 - (x_{01}^y - c_2^y)^2 \\
 (x_{01}^x - c_2^x)^2 + (x_{01}^y - c_2^y)^2 &< r_2^2 \\
-(x_{01} - c_2)^2 &< r_2^2 \\
-(\alpha c_{01} + \beta c_{01}^\perp - c_{02})^2 &< r_2^2 \\
-\alpha^2 c_{01}^2 + \beta^2 c_{01}^2 + c_{02}^2 - 2 \alpha c_{01} \cdot c_{02} + 2 \beta c_{01} \times c_{02} &< r_2^2 \\
-\hat{\alpha}^2 + \hat{\beta}^2 + 4 c_{02}^2 c_{01}^2 - 4\hat{\alpha} c_{01} \cdot c_{02} + 4 \hat{\beta} c_{01} \times c_{02} &< 4 r_2^2 c_{01}^2 \\
-4 r_0^2 c_{01}^2 + 4 c_{02}^2 c_{01}^2 - 4\hat{\alpha} c_{01} \cdot c_{02} + 4 \hat{\beta} c_{01} \times c_{02} &< 4 r_2^2 c_{01}^2 \\
-4 c_{01}^2 (r_0^2 + c_{02}^2 - r_2^2) - 4\hat{\alpha} c_{01} \cdot c_{02} + 4 \hat{\beta} c_{01} \times c_{02} &< 0 \\
-c_{01}^2 (r_0^2 + c_{02}^2 - r_2^2) - \hat{\alpha} c_{01} \cdot c_{02} + \hat{\beta} c_{01} \times c_{02} &< 0 
+(x_{01} - c_2)^2 &< r_2^2
 \end{align*}
-
-\TODO: This is exactly the question of whether $x_{01}$ is inside $S_2$, and should be merged into that section.
+which is exactly the question of whether $x_{01}$ is inside $S_2$ as answered above.
 
 Before squaring, the sign of the LHS is given by
 \begin{align*}
@@ -237,5 +239,75 @@ Thus the angle is $> 180^\circ$ for the intersection to the left of segment $(c_
 \section{Circular arc polygons}
 
 Well, those are all the predicates we need for exact circular arc constructive solid geometry.  \TODO: Are those really all we needed?
+
+\section{Precision vs. flatness}
+
+Unfortunately, implicit arcs using integer centers and radii are unable to represent straight lines exactly, raising an issue of precision.
+For concreteness, let's assume an accuracy goal of 1 micron ($10^{-6}$ m) for a bounding box size of 1 meter.  This is a relative accuracy
+requirement of $\epsilon = 10^{-6}$.  If we approximate a straight segment of length $l$ with a finite radius $r$, the maximum deviation is
+\begin{align*}
+\Delta &= r - \sqrt{r^2 - \left(\frac{l}{2}\right)^2} \\
+       &= r - r \sqrt{1 - \frac{l^2}{4 r^2}} \\
+       &\approx r - r \left(1 - \frac{l^2}{8 r^2} \right) \\
+       &= \frac{l^2}{8 r}
+\end{align*}
+Requiring $\Delta < \epsilon l$, we have
+\begin{align*}
+\epsilon l &> \frac{l^2}{8 r} \\
+\frac{r}{l} &> \frac{1}{8 \epsilon} \approx 10^{-5}
+\end{align*}
+This macroresolution requirement multiplies with the microresolution requirement, so if single segments are allowed to stretch all the way
+across the domain, we'd require a total relative accuracy of $10^{-11}$,  Since $10^{-9}$ is right at the limit of what a single precision
+int provides, this is impractical without switching to 64 bit.  $10^{-8}$ is probably the best we can do without running into integer overflow,
+and this requires raising the integer limit to $2^{26}$ or so.  What can we get out of $10^{-8}$?  We can easily save one order of magnitude by
+requiring no segment to extend more than $1/10$th of the bounding box, and then two orders of magnitude if the bounding box was assumed to be
+only $10$ cm rather than 1 m.
+
+So that's what we'll do, at least for now:
+\begin{itemize}
+\item Ask for a relative accuracy of $10^-5$, corresponding to 1 micron in a 10 cm box.
+\item Subdivide arcs down to 10\% of the bounding box size.
+\item Raise the single precision integer limit from $2^{24}$ to $2^{26}$, abandoning the ``fits within a float'' invariant.
+\end{itemize}
+Additionally, our first implementation will ignore the subdivision step, and therefore achieve only $10^{-4.5}$ accuracy.  All of this stuff
+does leave a bit of a bad taste in one's mouth, but I'll set that aside for now.
+
+\section{Safe quantization}
+
+Suppose we quantize a single circular arc polygon to integer centers $c_i$ and radii $r_i$.  The contour makes sense only if adjacent circles
+actually intersect, so we require
+\begin{align*}
+|r_{i+1} - r_i| < |\Delta c_i| < r_i + r_{i+1}
+\end{align*}
+While it's possible to achieve this, it'd be hard to guarantee that the intersections don't move a lot.
+
+\section{Endpoint-based arc representation}
+
+Just in case, let's talk about endpoint based arc representation.  For stability, we'll arrange things so that arcs subtend under $180^\circ$.
+Thus, arc $(x_0,x_1,x_2)$ moves from $x_0$ to $x_2$ around the circumcircle in whichever way is fastest.
+
+\subsection{Implicitization}
+
+Assuming general position, which we can of course always do, the implicit equation for circle $(x_0,x_1,x_2)$ is
+\begin{align*}
+\det \left(\begin{array}{ccc}
+  x^2 & x & 1 \\
+  x_0^2 & x_0 & 1 \\
+  x_1^2 & x_1 & 1 \\
+  x_2^2 & x_2 & 1
+\end{array} \right ) &= 0 \\
+a_2 x^2 + a_1 \cdot x + a_0 &= 0
+\end{align*}
+where $a_2, a_1, a_0$ have degrees $2, 3, 4$, respectively.  Note: $a_2$ is twice the area of triangle $(x_0,x_1,x_2)$.  Expanding the equation for
+a circle, we have
+\begin{align*}
+(x - c)^2 - r^2 &= 0 \\
+x^2 - 2c \cdot x + c^2 - r^2 &= 0 \\
+a_2 x^2 - 2a_2 c \cdot x + a_2 (c^2 - r^2) &= 0 \\
+\hat{c} = 2 a_2 c &= -a_1 \\
+a_2 r^2 &= a_2 c^2 - a_0 \\
+\hat{r}^2 = 4 a_2^2 r^2 &= 4 a_2^2 c^2 - 4 a_2 a_0 = a_1^2 - 4 a_2 a_0 \\
+\end{align*}
+A rough estimate is that our $24$ degree intersection ordering predicate would become $4(6+12) = 72$ degree.
 
 \end{document}
