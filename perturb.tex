@@ -44,13 +44,15 @@
 We present a symbolic perturbation scheme for arbitrary polynomial geometric predicates, which combines the benefits of
 Seidel's simple randomized linear perturbation scheme with Yap's multiple infinitesimal scheme for general predicates.
 Like Seidel's randomized scheme, our method accepts black box polynomial functions as input.
-For nonmaliciously chosen predicates, the algorithm is as fast as Seidel's scheme, and in particular scales linearly
+For nonmaliciously chosen predicates, the algorithm is as fast as Seidel's scheme, and in particular scales reasonably
 with the degree of the polynomial even for fully degenerate input.  Like Yap's scheme, the computed sign is deterministic,
-thus never requires an algorithmic restart (assuming a high quality pseudorandom generator), and works for arbitrary
+never requiring an algorithmic restart (assuming a high quality pseudorandom generator), and works for arbitrary
 predicates with no knowledge of their structure.  We also apply our technique to exactly or nearly exactly rounded
 constructions that work correctly for degenerate input, using iterated l'H\^opital's rule to compute the necessary
 singular limits.
 \end{abstract}
+
+\section{Notes}
 
 \TODO: Mention that this stuff could be integrated into a library like CORE to work with arbitrary algebraic expressions.
 It would be worse from a black box perspective, but still useful.
@@ -59,6 +61,48 @@ It would be worse from a black box perspective, but still useful.
 In detail, an algorithm is usually correct if it is correct for all semi-algebraic configurations of a relatively small number of points.  These test sets have strictly positive measure, so suitable random input will likely find them.
 
 \TODO: General question: what is the best way to extend symbolic perturbation to functions with sqrts while preserving the black box structure?  Automatic differentiation, probably.
+
+\TODO: Look up snap rounding
+\TODO: Add Yap and Seidel citations, plus original simulation of simplicity paper
+@article{seidel1998nature,
+
+\cite{wein2006circles}: Exact by keeping everything as rational ``one-root'' numbers ($a + b \sqrt{c}$).  No discussion of degeneracies or degree.
+
+\cite{halperin2004controlled}: Modify original circles to avoid degeneracies.  \TODO: Look up original controlled perturbation paper.  This is 
+
+\cite{edelsbrunner1990simulation}: Original simulation of simplicity paper, followed \cite{yap1990symbolic}, \cite{emiris1992efficient}, and \cite{emiris1995general}.
+
+\cite{yap1990symbolic}: Mentions that randomized schemes are unsatisfactory, though for a silly reason that they destroy the theoretical complexity.  The real reason is that a sufficiently
+large problem may experience $O(1)$ expected degeneracies under a random perturbation, and therefore require a very large number of restarts, or the additional complexity of partial restarts.
+They also discuss nonstandard analysis, which is the language we'll use to describe everything.  After dismissing randomized methods, Yap also notes that ``probably'' only a small number of
+terms need to be evaluated, which is somewhat odd.  In general, Yap's discussion of the complexity of polynomial evaluation is completely broken, since it uses the number of monomials,
+and the number of monomials is in general exponential.
+
+\cite{emiris1992efficient}: Mentions both randomized linear schemes and $x_{i,j} + \epsilon i^j$ schemes, possibly mod some prime to avoid blowup.  Proofs of validity are required for
+each new predicate to be used.  At least without the mod, the perturbation is nonrandom and therefore might explore horrible worst case configurations (of convex hull, say), as with Yap's
+algorithm.  In fact yes: \cite{burnikel1994degeneracy} say that Emiris and Canny's scheme does hit this kind of worst case.
+
+IMPORTANT: We should extract ourselves from the debate over whether perturbation is good or bad relative to other schemes, and simply present our new method and its advantages.
+NOTE: If we're concerned that degeneracy handling will be slow, we can simply apply a randomized finite perturbation to the input.
+
+\cite{emiris1995general}: Seems to be discussing the same randomized linear scheme.  Seidel clearly didn't invent this.
+
+\cite{burnikel1994degeneracy}: Argues that perturbation is slower and more complicated to implement than simply handling degeneracies directly.  Interesting case: they note that \cite{emiris1992efficient}
+can cause degenerate algorithms to hit worst case behavior of output dependent algorithms like convex hull.  Randomized schemes avoid this problem.
+
+
+\cite{oruc2000explicit}, \cite{olver2006multivariate}, \cite{neidinger2009multivariable}: The full explicit factorization was cobbled together from these three papers.
+
+\cite{halperin1998perturbation}, \cite{halperin2004controlled}: They add small perturbations to the input to guarantee no degeneracies, similar to what Martin does.
+This is easier in their case because they have roughly constant radius spheres, and they have a nice classification of all the problems that can arise.  It does
+require careful analysis of the predicates involved, and what kind of degeneracies can occur.  The second paper does a bunch of detailed floating point analysis.
+It's possible these schemes are superior, but they require per-algorithm analysis.
+
+\cite{devillers2012qualitative}: Instead of using algebraic techniques, use specially tailored geometric perturbations based on the type of predicates used.  This appears to
+be significantly better in practice when it works, but requires per-predicate analysis.
+
+
+\cite{devillers2000algebraic}: Degree 12 predicates for circular arc arrangements, no discussion of perturbation.
 
 \section{Polynomial interpolation}
 
@@ -310,4 +354,7 @@ a_2 r^2 &= a_2 c^2 - a_0 \\
 \end{align*}
 A rough estimate is that our $24$ degree intersection ordering predicate would become $4(6+12) = 72$ degree.
 
+\bibliography{references}
+\bibliographystyle{acm}
+%\bibliographystyle{model1-num-names}
 \end{document}

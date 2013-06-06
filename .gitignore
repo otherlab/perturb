@@ -2,4 +2,7 @@
 *.log
 *.fls
 *.pdf
+*.bbl
+*.blg
 .sconsign.dblite
+.DS_Store
