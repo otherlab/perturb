@@ -23,6 +23,7 @@
 \newtheorem{rmk}[theorem]{Remark}
 \newcommand{\co}{\negthinspace :}
 \newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
 \newcommand{\Z}{\mathbb{Z}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\C}{\mathbb{C}}
@@ -35,8 +36,8 @@
 \newcommand{\TODO}{{\color{red} TODO}}
 
 \title{A deterministic pseudorandom perturbation scheme for arbitrary polynomial predicates}
-\author{Geoffrey Irving\thanks{Email: irving@naml.us, Otherlab, San Francisco, CA, United States}
-\and Forrest Green\thanks{\TODO}}
+\author{Geoffrey Irving\thanks{Email: irving@naml.us, forrest@otherlab.com, Otherlab, San Francisco, CA, United States}
+\and Forrest Green$^*$}
 \date{Version 1, \today}
 
 \begin{document}
@@ -137,7 +138,7 @@ f_3 &= f(x + \epsilon_1 y_1 + \epsilon_2 y_2 + \epsilon_3 y_3) \\
 \end{align*}
 and stopping as soon as we arrive at a nonzero polynomial $f_k(\epsilon_1. \ldots, \epsilon_k)$.
 To compute each $f_k$, we use a black box function for $f(x)$ to evaluate $f_k(\epsilon_1, \ldots, \epsilon_k)$ for the $\binom{k+d}{k}$ nonnegative tuples $(\epsilon_1, \ldots, \epsilon_k)$
-s.t.\ $\epsilon_1 + \cdots + \epsilon_k \le d$, as discussed in \cite{neidinger2009multivariable} (see also \autoref{polynomial}).  If any values are nonzero, we use multivariate
+s.t.\ $\epsilon_1 + \cdots + \epsilon_k \le d$, as discussed in \cite{neidinger2009multivariable} and \autoref{polynomial}.  If any values are nonzero, we use multivariate
 polynomial interpolation to recover the $\binom{k+d}{k}$ coefficients of $f_k$, and return the sign of the least infinitesimal nonzero term.
 
 We show that the computational cost is dominated by the first perturbation term even for arbitrarily degenerate input, as long as the range $Y$ of the random generator
@@ -146,7 +147,7 @@ by setting one $\epsilon_i$ to one and the others to zero.  Thus, if the polynom
 $$\Pr(f_k = 0) \le \frac{d^k}{|Y|^k}.$$
 The sizes of the lattice points on which we evaluate $f$ grow slowly with $k$, so the cost of a single polynomial evaluation is effectively $O(1)$ where the constant depends on the
 polynomial, even in the bit complexity model.  Similarly, the sizes of the numbers used for multivariate interpolation also grow slowly with $k$, so the cost of multivariate
-interpolation at level $k$ is $O\left(\binom{d + k}{k}^2\right)$ (see Appendix \TODO).  Thus, the expected cost of the perturbation scheme is
+interpolation at level $k$ is $O\left(\binom{d + k}{k}^2\right)$ (see \autoref{polynomial}).  Thus, the expected cost of the perturbation scheme is
 \begin{align} \label{cost}
 \sum_{k = 0}^\infty \Pr(f_k = 0) O\left(\binom{d + k + 1}{k + 1}^2\right) \le \sum_{k = 0}^\infty \frac{d^k}{|Y|^k} O(d^{2k+2}) = O\left(d^2 \sum_{k = 0}^\infty \frac{d^{3k}}{|Y|^k} \right)
 \end{align}
@@ -241,7 +242,7 @@ box hierarchies to find intersections and then fire rays along the $x$-axis to g
 triangulation algorithm is $O(n \log n)$ for arbitrarily degenerate input, and happily computes a random but valid Delaunay triangulation if all points are at the origin.  Our current Boolean
 operation algorithms degrade to $O(n^2)$ for fully degenerate input since they compute an arrangement of curves as the first step; this slowdown is independent of the perturbation
 technique used, and also occurs for badly formed nondegenerate input.  Our current implementation of circular arc Booleans uses predicates of degree up to 20, but this is reducible 
-to degree 12 as discussed in \cite{devillers2000algebraic}, or to degree 6 using a combination of polynomial factoring and algorithmic changes (see \TODO: Appendix?).  Even
+to degree 12 as discussed in \cite{devillers2000algebraic}, or to degree 6 using a combination of polynomial factoring and algorithmic changes (see \autoref{predicates}).  Even
 degree 6 is problematic for Yap's scheme due to the worst case exponential blowup in the number of terms.  Finally, we note similar work in CGAL on circle arrangements in
 \cite{wein2006circles}; this is orthogonal to the contribution of our work.
 
@@ -303,238 +304,17 @@ $$\prod_i x_i(x_i-1)\cdots(x_i-(n_i-1))$$
 which corresponds to the first half of \autoref{vandermonde}.  The multivariate generalization of the second half of \autoref{vandermonde} is easy, since the multivariate Newton to
 monomial basis transformation matrix factors into commuting matrices each expanding one variable, and these matrices are block diagonal with respect to the other variables.
 
-\section{Circular arc predicates}
+\section{Degree 6 circular arc predicates} \label{predicates}
 
-\subsection{Do two circles intersect?}
+Our current implementation of circular arc polynomial Booleans predicates up to the degree 20.  Although our method handles high degree predicates without difficulty, they are
+naturally slower, and it is natural to look for lower degree versions.  Indeed, \cite{devillers2000algebraic} show that the critical predicate, comparing the $y$ coordinates of
+two intersections of two different pairs of circles $C_0,C_1$ and $C_2,C_3$, can be reduced to degree 12 using resultant techniques.  We believe this is optimal for that predicate, since the resulting
+polynomial is irreducible over $\Q$.  However, to compute a circular arc arrangements it suffices to consider the case where $C_0 = C_2$; that is, comparing the $y$ coordinates
+of the intersections of one circle with two others.  In this case, the polynomials can be factored into terms with degree $\le 6$.  One significant algorithmic change is required,
+since we can no longer fire a horizontal or vertical ray from the intersection of $C_0,C_1$ and detect intersections against unrelated circle intersections.  Instead, we must fire
+rays from exactly known (degree 1) $y$ coordinates, which is sufficient to determine the winding number of a given circular arc polygon (or connected component of an arrangement)
+as long as the bounding box touches at least one such ray.  For most applications, polygons smaller than this may be safely discarded.
 
-Let's work out all the predicates we need for circular arc booleans in the plane.  Let $S_i = (c_i,r_i)$ be the $i$th
-circle with center $c_i$ and radius $r_i$.  Circles $S_0$ and $S_1$ intersect iff
-$$ | r_1 - r_0 | < |\Delta c| < r_1 + r_0. $$
-Since all quantities are positive, we can square to get
-\begin{align} \label{two-circles}
-(r_1 - r_0)^2 < \Delta c^2 < (r_1 + r_0)^2
-\end{align}
-where both inequalities are degree two polynomial predicates.
-
-\subsection{One intersection of two circles}
-
-Given circles $S_0, S_1$, define the intersection point $x_{01}$ as the intersection
-of $S_0,S_1$ to the left of line $c_0c_1$.  We have
-\begin{align*}
-x_{01} &= (1-\alpha) c_0 + \alpha c_1 + \beta \Delta c^\perp \\
-(x_{01} - c_i)^2 &= r_i^2 \\
-x_{01}^2 - 2x_{01} \cdot c_i + c_i^2 = r_i^2.
-\end{align*}
-Subtracting the two circle equations gives
-\begin{align*}
--2x_{01} \cdot \Delta c + c_1^2 - c_0^2 = r_1^2 - r_0^2 \\
--2c_0 \cdot \Delta c -2\alpha {\Delta c}^2 + (c_0 + c_1) \cdot \Delta c &= r_1^2 - r_0^2 \\
-(1-2\alpha) {\Delta c}^2 &= r_1^2 - r_0^2 \\
-1 - 2 \alpha &= \frac{r_1^2 - r_0^2}{\Delta c^2}
-\end{align*}
-Let
-$$\gamma = \frac{1 - 2\alpha}{2} = \frac{r_1^2 - r_0^2}{2\Delta c^2}$$
-so that $\alpha = 1/2 - \gamma$ and
-\begin{align*}
-x_{01} &= (1-1/2 + \gamma) c_0 + (1/2 - \gamma) c_1 + \beta \Delta c^\perp \\
-       &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp
-\end{align*}
-Substituting into $S_0$'s equation gives
-\begin{align*}
-(x_{01} - c_0)^2 &= r_0^2 \\
-\left((1/2 - \gamma) \Delta c + \beta \Delta c^\perp \right)^2 &= r_0^2 \\
-(1/2 - \gamma)^2 \Delta c^2 + \beta^2 \Delta c^2 &= r_0^2 \\
-\beta^2 &= \frac{r_0^2}{\Delta c^2} - (1/2 - \gamma)^2 \\
-\beta^2 &= \frac{r_0^2}{\Delta c^2} - \left(\frac{\Delta c^2 - r_1^2 + r_0^2}{2 \Delta c^2}\right)^2 \\
-4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \left( \Delta c^2 - r_1^2 + r_0^2 \right)^2
-\end{align*}
-To recap, the intersection between circles $S_0$ and $S_1$ is described by
-\begin{align*}
-x_{01} &= c_0 + \alpha \Delta c + \beta \Delta c^\perp \\
-       &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp \\
-\hat{\alpha} = 2 \alpha \Delta c^2 &= \Delta c^2 - r_1^2 + r_0^2 \\
-\hat{\gamma} = 2 \gamma \Delta c^2 &= r_1^2 - r_0^2 \\
-\hat{\beta}^2 = 4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \hat{\alpha}^2
-\end{align*}
-where $^\perp$ rotates left by $90^\circ$ and we choose the positive square root for $\beta$.
-
-\subsection{Is the intersection of two circles inside a third?}
-
-Substituting $x_{01}$ into the equation for circle $S_2$ gives
-\begin{align*}
-(x_{01} - c_2)^2 &< r_2^2 \\
-(c_0 + \alpha c_{01} + \beta c_{01}^\perp - c_2)^2 &< r_2^2 \\
-(\alpha c_{01} + \beta c_{01}^\perp - c_{02})^2 &< r_2^2 \\
-\alpha^2 c_{01}^2 + \beta^2 c_{01}^2 + c_{02}^2 - 2 \alpha c_{01}\cdot c_{02} - 2 \beta c_{01}\times c_{02} &< r_2^2 \\
-4\alpha^2 c_{01}^4 + 4\beta^2 c_{01}^4 + 4c_{01}^2 c_{02}^2 - 8 \alpha c_{01}^2 c_{01}\cdot c_{02} - 8 \beta c_{01}^2 c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
-\hat{\alpha}^2 + \hat{\beta}^2 + 4c_{01}^2 c_{02}^2 - 4 \hat{\alpha} c_{01}\cdot c_{02} - 4 \hat{\beta} c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
-4 r_0^2 c_{01}^2 + 4 c_{01}^2 c_{02}^2 - 4 \hat{\alpha} c_{01}\cdot c_{02} - 4 \hat{\beta} c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
-r_0^2 c_{01}^2 + c_{01}^2 c_{02}^2 - \hat{\alpha} c_{01}\cdot c_{02} - \hat{\beta} c_{01}\times c_{02} &< r_2^2 c_{01}^2 \\
-c_{01}^2 (c_{02}^2 + r_0^2 - r_2^2) - \hat{\alpha} c_{01}\cdot c_{02} - \hat{\beta} c_{01}\times c_{02} &< 0 \\
-\hat{\alpha}_{02} c_{01}^2 - \hat{\alpha}_{01} c_{01}\cdot c_{02} - \hat{\beta}_{01} c_{01}\times c_{02} &< 0 \\
-\hat{\alpha}_{01} c_{01}\cdot c_{02} - \hat{\alpha}_{02} c_{01}^2 + \hat{\beta}_{01} c_{01}\times c_{02} &> 0 \\
-\end{align*}
-
-\subsection{Are the intersections of two circles with a third counterclockwise?}
-
-Alternatively, given three circles $S_0, S_1, S_2$, we ask whether $x_{01}$ occurs to the right of $x_{02}$.  Equivalently, do we have
-\begin{align*}
-(x_{01} - c_0) \times (x_{02} - c_0) &> 0 \\
-(\alpha_1 \Delta c_1 + \beta_1 \Delta c_1^\perp) \times (\alpha_2 \Delta c_2 + \beta_2 \Delta c_2^\perp) &> 0 \\
-(\alpha_1 \alpha_2 + \beta_1 \beta_2) \Delta c_1 \times \Delta c_2 + (\alpha_1 \beta_2 - \beta_1 \alpha_2) \Delta c_1 \cdot \Delta c_2 &> 0
-\end{align*}
-Multiply through by $4 \Delta c_1^2 \Delta c_2^2$ to clear nonconstant fractions to get
-\begin{align} \label{circle-order}
-(\alpha'_1 \alpha'_2 + \beta'_1 \beta'_2) \Delta c_1 \times \Delta c_2 + (\alpha'_1 \beta'_2 - \beta'_1 \alpha'_2) \Delta c_1 \cdot \Delta c_2 &> 0
-\end{align}
-This has the form
-$$a_6 + a_4 \sqrt{b_4} + a_4 \sqrt{b_4} + a_2 \sqrt{b_4} \sqrt{b_4}$$
-where subscript $k$ denotes degree $k$.  This matches lemma (5) from "On the Degree of Standard Geometric Predicates for Line Transversals in 3D", so the final predicate degree is 24.
-
-Finally, we need a much simpler version of (\ref{circle-order}) where the second direction is one of the coordinate axes, call it $e$:
-\begin{align*}
-e \times (x_{01} - c_0) &> 0 \\
-e \times (\alpha \Delta c + \beta \Delta c^\perp) &> 0 \\
-e \times (\hat{\alpha} \Delta c + \hat{\beta} \Delta c^\perp) &> 0 \\
-\hat{\alpha} e \times \Delta c &> -\hat{\beta} e \cdot \Delta c \\
-\hat{\alpha}^2 (e \times \Delta c)^2 &> \hat{\beta}^2 (e \cdot \Delta c)
-\end{align*}
-where the last equation is correct only for appropriate sign configurations.
-
-\subsection{Is one circle intersection above another?}
-
-Given four circles $S_0$ through $S_3$, is $x_{01}$ below $x_{23}$?  This predicate has the form
-\begin{align*}
-c_0^y + \alpha_{01} c_{01}^y + \beta_{01} c_{01}^x &< c_2^y + \alpha_{23} c_{23}^y + \beta_{23} c_{23}^x \\
-0 &< c_{02}^y + \alpha_{23} c_{23}^y - \alpha_{01} c_{01}^y + \beta_{23} c_{23}^x - \beta_{01} c_{01}^x \\
-0 &< 2 c_{02}^y c_{01}^2 c_{23}^2 + \hat{\alpha}_{23} c_{23}^y c_{01}^2 - \hat{\alpha}_{01} c_{01}^y c_{23}^2 + \hat{\beta}_{23} c_{23}^x c_{01}^2 - \hat{\beta}_{01} c_{01}^x c_{23}^2
-\end{align*}
-
-\subsection{Does the horizontal line through one circle intersection intersect another circle?}
-
-In other words, given circles $S_0, S_1, S_2$, do we have
-\begin{align*}
-c_2^y - r_2 &< c_0^y + \alpha c_{01}^y + \beta c_{01}^x < c_2^y + r_2 \\
-2 (c_{02}^y - r_2) c_{01}^2 &< \hat{\alpha} c_{01}^y + \hat{\beta} c_{01}^x < 2 (c_{02}^y + r_2) c_{01}^2
-\end{align*}
-
-\subsection{Is the intersection of a horizontal line through one circle intersection with another circle to the right of the first intersection?}
-
-Given three circles $S_0, S_1, S_2$, where the horizontal line through $x_{01}$ intersects $S_2$ at $p$, we ask whether $x_{01}^x < p^x$.  We have
-\begin{align*}
-p^y &= x_{01}^x \\
-(p - c_2)^2 &= r_2^2 \\
-(p^x - c_2^x)^2 + (x_{01}^y - c_2^y)^2 &= r_2^2 \\
-p^x - c_2^x &= s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2} \\
-p^x &= c_2^x + s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2}
-\end{align*}
-where $s = \pm 1$ depending on which intersection we're considering.  Our predicate is
-\begin{align*}
-x_{01}^x < c_2^x + s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2} \\
-x_{01}^x - c_2^x < s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2}
-\end{align*}
-Assuming both sides are positive, squaring gives
-\begin{align*}
-(x_{01}^x - c_2^x)^2 &< r_2^2 - (x_{01}^y - c_2^y)^2 \\
-(x_{01}^x - c_2^x)^2 + (x_{01}^y - c_2^y)^2 &< r_2^2 \\
-(x_{01} - c_2)^2 &< r_2^2
-\end{align*}
-which is exactly the question of whether $x_{01}$ is inside $S_2$ as answered above.
-
-Before squaring, the sign of the LHS is given by
-\begin{align*}
-x_{01}^x - c_2^x &> 0 \\
-\alpha c_{01}^x + \beta c_{01}^y - c_2^x &> 0 \\
-\hat{\alpha} c_{01}^x + \hat{\beta} c_{01}^y - 2 c_2^x c_{01}^2 &> 0
-\end{align*}
-
-\subsection{Is the angle at an intersection counterclockwise?}
-
-Let $t_0, t_1$ be the counterclockwise tangents at intersection $x_{01}$.  The following are equivalent:
-\begin{align*}
-t_0 \times t_1 &> 0 \\
-(x_{01} - c_0)^\perp \times (x_{01} - c_1)^\perp &> 0 \\
-(x_{01} - c_0) \times (x_{01} - c_1) &> 0 \\
-(x_{01} - c_0) \times (c_0 - c_1) &> 0 \\
-(\alpha \Delta c + \beta \Delta c^\perp) \times \Delta c &< 0 \\
-\beta \Delta c^2 &> 0 \\
-\hat{\beta} &> 0
-\end{align*}
-
-Thus the angle is $> 180^\circ$ for the intersection to the left of segment $(c_0,c_1)$, $< 180^\circ$ for the intersection to the right.
-
-\section{Circular arc polygons}
-
-Well, those are all the predicates we need for exact circular arc constructive solid geometry.  \TODO: Are those really all we needed?
-
-\section{Precision vs. flatness}
-
-Unfortunately, implicit arcs using integer centers and radii are unable to represent straight lines exactly, raising an issue of precision.
-For concreteness, let's assume an accuracy goal of 1 micron ($10^{-6}$ m) for a bounding box size of 1 meter.  This is a relative accuracy
-requirement of $\epsilon = 10^{-6}$.  If we approximate a straight segment of length $l$ with a finite radius $r$, the maximum deviation is
-\begin{align*}
-\Delta &= r - \sqrt{r^2 - \left(\frac{l}{2}\right)^2} \\
-       &= r - r \sqrt{1 - \frac{l^2}{4 r^2}} \\
-       &\approx r - r \left(1 - \frac{l^2}{8 r^2} \right) \\
-       &= \frac{l^2}{8 r}
-\end{align*}
-Requiring $\Delta < \epsilon l$, we have
-\begin{align*}
-\epsilon l &> \frac{l^2}{8 r} \\
-\frac{r}{l} &> \frac{1}{8 \epsilon} \approx 10^{-5}
-\end{align*}
-This macroresolution requirement multiplies with the microresolution requirement, so if single segments are allowed to stretch all the way
-across the domain, we'd require a total relative accuracy of $10^{-11}$,  Since $10^{-9}$ is right at the limit of what a single precision
-int provides, this is impractical without switching to 64 bit.  $10^{-8}$ is probably the best we can do without running into integer overflow,
-and this requires raising the integer limit to $2^{26}$ or so.  What can we get out of $10^{-8}$?  We can easily save one order of magnitude by
-requiring no segment to extend more than $1/10$th of the bounding box, and then two orders of magnitude if the bounding box was assumed to be
-only $10$ cm rather than 1 m.
-
-So that's what we'll do, at least for now:
-\begin{itemize}
-\item Ask for a relative accuracy of $10^-5$, corresponding to 1 micron in a 10 cm box.
-\item Subdivide arcs down to 10\% of the bounding box size.
-\item Raise the single precision integer limit from $2^{24}$ to $2^{26}$, abandoning the ``fits within a float'' invariant.
-\end{itemize}
-Additionally, our first implementation will ignore the subdivision step, and therefore achieve only $10^{-4.5}$ accuracy.  All of this stuff
-does leave a bit of a bad taste in one's mouth, but I'll set that aside for now.
-
-\section{Safe quantization}
-
-Suppose we quantize a single circular arc polygon to integer centers $c_i$ and radii $r_i$.  The contour makes sense only if adjacent circles
-actually intersect, so we require
-\begin{align*}
-|r_{i+1} - r_i| < |\Delta c_i| < r_i + r_{i+1}
-\end{align*}
-While it's possible to achieve this, it'd be hard to guarantee that the intersections don't move a lot.
-
-\section{Endpoint-based arc representation}
-
-Just in case, let's talk about endpoint based arc representation.  For stability, we'll arrange things so that arcs subtend under $180^\circ$.
-Thus, arc $(x_0,x_1,x_2)$ moves from $x_0$ to $x_2$ around the circumcircle in whichever way is fastest.
-
-\subsection{Implicitization}
-
-Assuming general position, which we can of course always do, the implicit equation for circle $(x_0,x_1,x_2)$ is
-\begin{align*}
-\det \left(\begin{array}{ccc}
-  x^2 & x & 1 \\
-  x_0^2 & x_0 & 1 \\
-  x_1^2 & x_1 & 1 \\
-  x_2^2 & x_2 & 1
-\end{array} \right ) &= 0 \\
-a_2 x^2 + a_1 \cdot x + a_0 &= 0
-\end{align*}
-where $a_2, a_1, a_0$ have degrees $2, 3, 4$, respectively.  Note: $a_2$ is twice the area of triangle $(x_0,x_1,x_2)$.  Expanding the equation for
-a circle, we have
-\begin{align*}
-(x - c)^2 - r^2 &= 0 \\
-x^2 - 2c \cdot x + c^2 - r^2 &= 0 \\
-a_2 x^2 - 2a_2 c \cdot x + a_2 (c^2 - r^2) &= 0 \\
-\hat{c} = 2 a_2 c &= -a_1 \\
-a_2 r^2 &= a_2 c^2 - a_0 \\
-\hat{r}^2 = 4 a_2^2 r^2 &= 4 a_2^2 c^2 - 4 a_2 a_0 = a_1^2 - 4 a_2 a_0 \\
-\end{align*}
-A rough estimate is that our $24$ degree intersection ordering predicate would become $4(6+12) = 72$ degree.
+\TODO: Pull over actual factorization
 
 \end{document}
