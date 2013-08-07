@@ -1,0 +1,168 @@
+#!/usr/bin/env python
+
+from __future__ import division
+from other.core import *
+from other.core.value import parser
+from other.core.exact.test_circle import random_circle_arcs,draw_circle_arcs
+import scipy
+import pylab
+import time
+
+# Parse arguments
+props = PropManager()
+mode = props.add('mode','delaunay').set_allowed('delaunay circles'.split()).set_required(1).set_help('Which algorithm to benchmark')
+count = props.add('count',2000).set_help('Maximum number of input primitives')
+min_count = props.add('min_count',100).set_help('Minimum number of input primitives')
+plot = props.add('plot',False).set_help('If true, plot the geometric result, otherwise run a performance benchmark')
+cgal = props.add('cgal',False).set_help('In Delaunay mode, run a CGAL benchmark for comparison')
+ratio = props.add('ratio',10**(1/5-1e-5)).set_help('Ratio between successive counts for benchmark plots')
+known = props.add('known',False).set_help('If true, plot performance results from the paper instead of performing a new benchmark')
+parser.parse(props,'Examples of symbolically perturbed algorithms',positional=[mode])
+
+def counts():
+  counts = []
+  c = count()
+  mc = min_count()
+  while c>=mc:
+    counts.append(int(c))
+    c /= ratio()
+  return asarray(counts)
+
+# Timings reported in paper
+delaunay_origin_times = {1000000:43.0137,630971:26.6435,398125:16.4314,251205:10.2438,158503:6.27573,100011:3.81903,63104:2.40592,39817:1.47675,25123:0.899576,15852:0.563275,10002:0.337834,6311:0.211147,3982:0.129133,2512:0.0781747,1585:0.0474846,1000:0.0285696,631:0.0172855,398:0.0102723,251:0.0060884,158:0.0037428,100:0.002131}
+delaunay_normal_times = {1000000:3.04583,630971:1.89083,398125:1.15743,251205:0.704592,158503:0.443554,100011:0.262706,63104:0.158659,39817:0.0998532,25123:0.0598575,15852:0.0371262,10002:0.0230417,6311:0.013841,3982:0.0083737,2512:0.00518808,1585:0.00327341,1000:0.00193625,631:0.00124411,398:0.000721166,251:0.000442935,158:0.00024197,100:0.000161869}
+circle_random_times = {100:0.007838141918182374,39:0.0013331908446091872,1000:0.7451964616775513,10:0.00012229442596435548,398:0.10982203483581543,15:0.00018817987014998252,630:0.2790352702140808,25:0.00047853589057922363,251:0.03875601291656494,158:0.016986773564265326,63:0.002714909613132477}
+circle_nearly_times = {100:0.04511804580688476,39:0.0065383636034452,1000:6.111583471298218,10:0.00046626925468444823,398:0.8447178602218628,15:0.0010568294952164835,630:2.376299500465393,25:0.002686360478401184,251:0.32814687490463257,158:0.12250416095440204,63:0.016878724098205566}
+circle_origin_times = {32:0.7610977108661945,354:212.62939902146658,9:0.03347727060317993,139:20.76139653646029,12:0.06883811950683594,898:1150.8237310647964,21:0.2797675609588623,566:422.56498128175735,55:2.583248846232891,89:7.646994042396545,223:54.95297911763191}
+
+def test_delaunay():
+  with Log.scope('delaunay'):
+    random.seed(17311)
+    def points(n,degenerate=False):
+      return zeros((n,2)) if degenerate else random.randn(n,2)
+    if plot():
+      X = points(count())
+      with Log.scope('compute'):
+        mesh = delaunay_points(X)
+      with Log.scope('plot'):
+        pylab.triplot(X[:,0],X[:,1],mesh.elements())
+        pylab.axis('off')
+        pylab.axes().set_aspect('equal')
+      pylab.show()
+    else:
+      cases = {}
+      for d in 1,0:
+        name = 'origin' if d else 'normal'
+        with Log.scope(name):
+          if known():
+            times = delaunay_origin_times if d else delaunay_normal_times
+            times = [times[c] for c in counts()]
+          else:
+            if cgal():
+              from helper import cgal_time_delaunay_points
+              compute = cgal_time_delaunay_points
+            else:
+              compute = delaunay_points
+            times = []
+            for c in counts():
+              X = points(c,degenerate=d)
+              reps = xrange(min(1000,int(ceil(2*count()/c))))
+              start = time.time()
+              for _ in reps:
+                compute(X)
+              end = time.time()
+              times.append((end-start)/len(reps))
+              Log.write('time %d = %g'%(c,times[-1]))
+          slope,base = scipy.polyfit(log(counts()),log(times),deg=1)
+          Log.write('base = %g, slope = %g'%(base,slope))
+          pylab.loglog(counts(),times,'o-',label=name)
+          cases[d] = asarray(times)
+          Log.write('times = %s'%dict(zip(counts(),times)))
+          n = len(times)
+      ratio = cases[1]/cases[0]
+      Log.write('ratio = %g %g'%(ratio.min(),ratio.max()))
+      pylab.xlabel('point count')
+      pylab.ylabel('time (s)')
+      pylab.legend(loc='lower right')
+      pylab.show()
+
+def degenerate_circle_arcs(*args):
+  import helper
+  return preprune_small_circle_arcs(helper.degenerate_circle_arcs(*args))
+
+def nearly_degenerate_circle_arcs(*args):
+  import helper
+  radius,shift = 1<<20,1<<10
+  return helper.nearly_degenerate_circle_arcs(radius,shift,*args)
+
+def test_circles():
+  with Log.scope('circles'):
+    random.seed(81731)
+    if plot():
+      arcs = random_circle_arcs(count(),4)
+      with Log.scope('union'):
+        arcs = circle_arc_union(arcs)
+      with Log.scope('draw'):
+        draw_circle_arcs(arcs)
+        pylab.axes().set_aspect('equal')
+        pylab.axis('off')
+      pylab.show()
+    else:
+      cases = {}
+      for name in 'origin nearly random'.split():
+        with Log.scope(name): 
+          generator = {'origin':degenerate_circle_arcs,
+                       'nearly':nearly_degenerate_circle_arcs,
+                       'random':random_circle_arcs}[name]
+          times = []
+          actual_counts = []
+          min_count = 1e10
+          if known():
+            data = {'origin':circle_origin_times,
+                    'nearly':circle_nearly_times,
+                    'random':circle_random_times}[name]
+            for c in counts()[::-1]:
+              ac = len(generator(c,4))
+              actual_counts.append(ac)
+              times.append(data[ac])
+          else:
+            for c in counts()[::-1]:
+              arcs = generator(c,4)
+              ac = len(arcs)
+              reps = xrange(min(1000,int(ceil(2*count()/c))))
+              start = time.time()
+              for _ in reps:
+                circle_arc_union(arcs)
+              end = time.time()
+              times.append((end-start)/len(reps))
+              actual_counts.append(ac)
+              Log.write('time %d = %g'%(ac,times[-1]))
+          slope,base = scipy.polyfit(log(actual_counts),log(times),deg=1)
+          Log.write('base = %g, slope = %g'%(base,slope))
+          pylab.loglog(actual_counts,times,'o-',label=name)
+          cases[name] = asarray(times)
+          Log.write('times = %s'%dict(zip(actual_counts,times)))
+          min_count = min(min_count,min(actual_counts))
+          n = len(times)
+      for fast,slow in ('random','origin'),('random','nearly'),('nearly','origin'):
+        ratio = cases[slow]/cases[fast]
+        Log.write('%s / %s ratio = %g %g'%(slow,fast,ratio.min(),ratio.max()))
+      pylab.xlim(xmin=min_count)
+      pylab.xlabel('4-gon count')
+      pylab.ylabel('time (s)')
+      pylab.legend(loc='lower right')
+      pylab.show()
+
+def main():
+  Log.configure('examples',0,0,100)
+  if cgal():
+    assert mode()=='delaunay'
+  if mode()=='delaunay':
+    test_delaunay()
+  elif mode()=='circles':
+    test_circles()
+  else:
+    raise RuntimeError('Unknown mode %s'%mode())
+
+if __name__=='__main__':
+  main()

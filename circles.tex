@@ -202,6 +202,29 @@ t_0 \times t_1 &> 0 \\
 
 Thus the angle is $> 180^\circ$ for the intersection to the left of segment $(c_0,c_1)$, $< 180^\circ$ for the intersection to the right.
 
+\subsection{Is a circle intersection below a horizontal line?}
+
+Consider two circles $S_0, S_1$ together with a horizontal line at coordinate $y$.  $x_{01}$ is below $y$ iff
+\begin{align*}
+y &> c_0^y + \alpha c_{01}^y + \beta c_{01}^x \\
+2 (y-c_0^y) c_{01}^2 - \hat{\alpha} c_{01}^y - \hat{\beta} c_{01}^x &> 0
+\end{align*}
+
+\subsection{Does one circle-horizontal intersection occur to the left of another?}
+
+Given a circle $S_0$ intersecting a horizontal line at coordinate $y$, the $x$ coordinate of the intersection satisfies
+\begin{align*}
+(x-c_0^x)^2 + (y-c_0^y)^2 &= r_0^2 \\
+x &= c_0^x + \sqrt{r_0^2 - (y-c_0^y)^2}
+\end{align*}
+where the square root sign is $-$ for left and $+$ for right.
+
+Consider two circles $S_0, S_1$ intersecting a horizontal line at coordinate $y$.  The first intersection is to the left of the second if
+\begin{align*}
+c_0^x + \sqrt{r_0^2 - (y-c_0^y)^2} &< c_1^x + \sqrt{r_1^2 - (y-c_1^y)^2} \\
+0 &< c_{01}^x + \sqrt{r_1^2 - (y-c_1^y)^2} - \sqrt{r_0^2 - (y-c_0^y)^2}
+\end{align*}
+
 \section{Circular arc polygons}
 
 Well, those are all the predicates we need for exact circular arc constructive solid geometry.  \TODO: Are those really all we needed?

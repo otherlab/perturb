@@ -1,0 +1,7 @@
+Import('env external clang windows library latex')
+
+external('cgal',flags=['USE_CGAL'],libs=['CGAL','gmp'],
+  cxxflags='' if windows else ' -Wno-uninitialized -Wno-c++11-narrowing -Wno-error=unused-variable -Wno-overloaded-virtual -Wno-sign-compare' if clang else ' -frounding-math -Wno-uninitialized')
+
+env = env.Clone(use_cgal=1)
+library(env,'perturb_helper',['other_core'])

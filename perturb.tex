@@ -8,6 +8,7 @@
 \usepackage{comment}
 \usepackage{color}
 \usepackage{hyperref}
+\usepackage{cprotect}
 
 \newcommand{\myspace}{\vspace{.1in}\noindent}
 \newcommand{\mymyspace}{\vspace{.1in}}
@@ -44,7 +45,7 @@
 \maketitle
 
 \begin{abstract}
-We present a symbolic perturbation scheme for arbitrary polynomial geometric predicates, which combines the benefits of
+We present a symbolic perturbation scheme for arbitrary polynomial geometric predicates which combines the benefits of
 Emiris and Canny's simple randomized linear perturbation scheme with Yap's multiple infinitesimal scheme for general predicates.
 Like the randomized scheme, our method accepts black box polynomial functions as input.  For nonmaliciously chosen predicates,
 our method is as fast as the linear scheme, and in particular scales reasonably with the degree of the polynomial even for fully
@@ -61,8 +62,8 @@ Symbolic perturbation is a standard technique in computational geometry for avoi
 adding an infinitesimally small perturbation to the inputs of a geometric algorithm.  The technique was introduced by
 \cite{edelsbrunner1990simulation}, with refinements in \cite{yap1990symbolic}, \cite{emiris1992efficient}, \cite{emiris1995general},
 and \cite{seidel1998nature}.  Consider a geometric function $G : \R^N \to S$ mapping input coordinates $x \in \R^N$ into
-some finite set $S$.  Examples of $G(x)$ include Delaunay triangulation, arrangements of lines or circles, or Boolean operations
-on shapes.  We will assume $G(x)$ can be computed using an algorithm that makes queries its input $x$ only through the
+some finite set $S$.  Examples of $G(x)$ include Delaunay triangulation, arrangements of lines or circles, and Boolean operations
+on shapes.  We will assume $G(x)$ can be computed using an algorithm that queries its input $x$ only through the
 signs of various polynomials $f(x)$ with integer coefficients, each representing a geometric predicate such as
 ``is this triangle counterclockwise?'' or ``do two circles intersect inside a third circle?''.  If $f(x) = 0$, the algorithm
 either fails due to ambiguity or requires special logic to handle the degeneracy.
@@ -81,7 +82,7 @@ In detail, whenever the algorithm asks for the sign of $f(x)$ for some integer c
 $f(x+\delta)$, which is a multivariate polynomial in the infinitesimals.  The sign of $f(x+\delta)$ is the sign of the ``least infinitesimal''
 nonzero monomial coefficient of this polynomial.
 
-We now distinguish between three existing symbolic perturbation schemes that can be expressed in this framework, and discuss their advantages
+We distinguish between three existing symbolic perturbation schemes that can be expressed in this framework, and discuss their advantages
 and disadvantages:
 
 \begin{enumerate}
@@ -89,7 +90,7 @@ and disadvantages:
 corresponds to evaluating $f(x_1+\epsilon_1, x_2+\epsilon_2, \ldots)$.  Since each coordinate has its own infinitesimal, $f(x+\delta)$ has at least
 one nonzero monomial unless $f$ is identically zero, so the scheme produces a nonzero sign for all polynomials.  Unfortunately, a degree $d$ polynomial
 $f$ results in an $f(x+\delta) \in \R[\epsilon_1,\epsilon_2, \ldots]$ with up to $\binom{n + d}{n}$ monomial terms where $n$ is the number of input
-coordinates used by $f$, which is worst case exponential in the degree in the predicate.  For extremely degenerate input, we may have to evaluate a large
+coordinates used by $f$, which is worst case exponential in the degree in the predicate.  For extremely degenerate input, we may need to evaluate a large
 number of coefficents before finding a nonzero.
 
 \item Emiris and Canny's deterministic linear scheme \cite{emiris1992efficient}: Group the input coordinates into $n$ $k$-vectors based on the dimension
@@ -110,7 +111,7 @@ it is possible to reduce this slowdown by restarting only part of the algorithm,
 
 In addition, \cite{burnikel1994degeneracy} note that a fixed deterministic perturbation may turn high degenerate input into worst case behavior for algorithms
 like convex hull: ignoring the $\operatorname{mod} p$, the deterministic linear scheme produces a convex hull of size $n^{\lceil d/2 \rceil}$ when all input
-points are at the origin.  We believe this also applies to Yap's scheme, and may also arise with the modular deterministic linear scheme.
+points are at the origin.  We believe this also applies to Yap's scheme, and may arise with the modular deterministic linear scheme.
 
 To summarize: Yap's deterministic scheme and the randomized linear scheme work for arbitrary polynomial predicates, but suffer from unfortunate performance penalties.
 The randomized linear scheme occasionally requires a restart of all or part of the computation, adding extra complexity to the surrounding algorithm
@@ -123,7 +124,7 @@ Our contribution is to combine the advantages of each of the above methods.
 
 Our approach is to introduce an infinite sequence of infinitesimals $\epsilon_1, \epsilon_2, \ldots$, choose deterministic pseudorandom coefficients $y_1, y_2, \ldots$
 with $y_{k,i} = \rand(k,i)$, and set
-$$\delta = \epsilon_1 y_1 + \epsilon_2 y_2 + \ldots.$$
+$$\delta = \epsilon_1 y_1 + \epsilon_2 y_2 + \cdots.$$
 Here $\rand$ is a deterministic pseudorandom generator with random access capability.  Our implementation uses the Threefry generator of
 \cite{salmon2011random}, with
 $$\rand : [0,2^{128}) \times [0,2^{128}) \to [0,2^{32}).$$
@@ -146,33 +147,41 @@ satisfies $d^3 \ll |Y|$.  In other words, our scheme has the same cost as the si
 by setting one $\epsilon_i$ to one and the others to zero.  Thus, if the polynomial predicate $f(x)$ is not identically zero, the Schwartz-Zippel lemma gives
 $$\Pr(f_k = 0) \le \frac{d^k}{|Y|^k}.$$
 The sizes of the lattice points on which we evaluate $f$ grow slowly with $k$, so the cost of a single polynomial evaluation is effectively $O(1)$ where the constant depends on the
-polynomial, even in the bit complexity model.  Similarly, the sizes of the numbers used for multivariate interpolation also grow slowly with $k$, so the cost of multivariate
-interpolation at level $k$ is $O\left(\binom{d + k}{k}^2\right)$ (see \autoref{polynomial}).  Thus, the expected cost of the perturbation scheme is
+polynomial.  Similarly, the sizes of the numbers used for multivariate interpolation also grow slowly with $k$, so the cost of multivariate
+interpolation at level $k$ is $O\left(d \binom{d + k}{k}^2\right)$ (see \autoref{polynomial}).  Thus, the expected cost of the perturbation scheme is
 \begin{align} \label{cost}
-\sum_{k = 0}^\infty \Pr(f_k = 0) O\left(\binom{d + k + 1}{k + 1}^2\right) \le \sum_{k = 0}^\infty \frac{d^k}{|Y|^k} O(d^{2k+2}) = O\left(d^2 \sum_{k = 0}^\infty \frac{d^{3k}}{|Y|^k} \right)
+\sum_{k = 0}^\infty \Pr(f_k = 0) O\hspace{-.25em}\left(d \binom{d + k + 1}{k + 1}^2\right) \le \sum_{k = 0}^\infty \frac{d^k}{|Y|^k} O(d^{2k+3})
+  = O\hspace{-.25em}\left(d^3 \sum_{k = 0}^\infty \frac{d^{3k}}{|Y|^k} \right) = O(d^3)
 \end{align}
-which is a convergent geometric series whenever $d^3 < |Y|$.  In practice, $d^3 \ll |Y|$; for $|Y| = 2^{32}$ terms with $k \ge 2$ contribute less than $1/4000$th of the expected cost
+where we need $d^3 < |Y|$ to guarantee a convergent geometric series.  In practice, $d^3 \ll |Y|$; for $|Y| = 2^{32}$ terms with $k \ge 2$ contribute less than $1/4000$th of the expected cost
 for polynomials up to degree $100$.  We emphasize that this bound is independent of the input $x$, and therefore holds even for maliciously chosen input data.  However, we do
 assume that $\rand$ behaves as a strong random source, and in particular that the polynomials $f(x)$ are not chosen with knowledge of $\rand$.\footnote{Though maliciously
 choosing $f(x)$ so that $f_1 = f_2 = 0$ is quite useful for unit testing purposes.}
 
 Thus, our method has the same complexity as the deterministic linear scheme, but like Yap's scheme and the randomized linear scheme it works on arbitrary polynomials.  As in the
-randomized scheme, the perturbation does not create any ``worst case'' behavior not already present in the input data.  Since the occasional random fallbacks occur one
+randomized scheme, the perturbation does not create any worst case behavior not already present in the input data.  Since the occasional random fallbacks occur one
 polynomial at a time, the outer structure of a geometric algorithm is blissfully unaware that randomness is used internally, and in particular we avoid poor bit complexity
 scaling when evaluating many predicates over the course of an algorithm.
+
+In practice, the dominant cost of the algorithm is black box predicate evaluation.  Even a single multiplication of two degree $d/2$ terms has complexity $O(d^2)$ using naive
+quadratic multiplication (which is typically the fastest algorithm for small degrees).  The linear perturbation phase peforms $d$ polynomial evaluations, for a total
+complexity of $O(d^3)$, and the constant is typically higher than for interpolation since most polynomials involve several such multiplications.  An $O(d^3)$ slowdown for degenerate
+cases is faster than previous general approaches but still a significant drawback (see \autoref{sec:results} for benchmarks).  Fortunately, a tiny amount of finite perturbation
+applied to the input can minimize both the $O(d^3)$ slowdown of perturbation and the $O(d^2)$ slowdown of unperturbed exact evaluation, relying on symbolic perturbation to
+unconditionally correctly handle the few remaining degeneracies.
 
 \section{Other approaches}
 
 Since the original introduction of the symbolic perturbation method several alternative schemes have been introduced for treating degeneracies in numerical algorithms.
 All of these approaches seem to require some algorithm or predicate specific treatment, which complicate the process of developing and especially testing new algorithms.
 However, the algorithm specific approaches may be superior to a general approach such as ours when they apply, either by avoiding the slowdown of occasional exact arithmetic
-entirely, by treating degenerate cases faster (our approach introduces a slowdown of $O(d^2)$ for the first perturbation level), or by computing the true exact answer rather
-than a perturbed answer.
+entirely, by treating degenerate cases faster (our approach introduces a slowdown of $O(d)$ for the first perturbation level over exact evaluation), or by computing the true exact
+answer rather than a perturbed answer.
 
 Perhaps the most natural approach to treating to degeneracies is to manually extend the definition of $G(x)$ to degenerate cases, and write algorithms which treat these cases
 directly.  For example, in an arrangement of lines, intersections of three or more lines can be detected and represented as higher degree vertices in the arrangement graph.
 \cite{burnikel1994degeneracy} argues that perturbation is slower and more complicated to implement than simply handling degeneracies directly, and presents two degeneracy-aware
-algorithms as evidence.  We believe our method reduces the implementation complexity of symbolic perturbation, but agree that a tailored algorithm is likely faster on highly
+algorithms as evidence.  We believe our method reduces the implementation complexity of symbolic perturbation, but agree that a tailored algorithm is faster on highly
 degenerate input.  Unlike the deterministic symbolic perturbation schemes, an algorithm built on our method will treat fully degenerate data as purely random data, in particular
 avoiding the worst case behavior of convex hull discussed in \cite{burnikel1994degeneracy}.
 
@@ -180,36 +189,38 @@ The \emph{controlled perturbation} approach of \cite{halperin1998perturbation} a
 of the algorithm to run with inexact floating point arithmetic.  Input points (spheres in their case) are processed one at a time, perturbing each new input to avoid degeneracies
 against all previous inputs.  Controlled perturbation requires a careful enumeration of the possible degeneracies that may arise, and a careful choice of the finite tolerance
 required for the algorithm to run safely.  A good tolerance bound may be computed with numerical analysis techniques as in \cite{halperin2004controlled}, at the cost of significant
-algorithmic-specific analysis.  The main advantage of their approach over ours is speed: the majority of their algorithms avoid all exact arithmetic and even all interval arithmetic
-or other filters.  We note that if degeneracies are pervasive and the cost of exact arithmetic times $O(d^2)$ is too large, an input to a symbolically perturbed algorithm can be randomly
+algorithm-specific analysis.  The main advantage of their approach over ours is speed: the majority of their algorithms avoid all exact arithmetic and even all interval arithmetic
+or other filters.  As noted above, if degeneracies are pervasive and a slowdown of $O(d^3)$ is too large, an input to a symbolically perturbed algorithm can be randomly
 jittered by a small amount, reducing the practical overhead to the cost of interval analysis filtering without affecting correctness.  Unlike controlled perturbation, this requires
 no algorithm specific analysis.
 
 \cite{devillers2012qualitative} present \emph{qualitative symbolic perturbation}, which replaces the algebraic perturbations used in previous perturbation schemes (and ours)
-by a sequence of carefully chosen, geometrically meaningful perturbations.  Their approach avoids the $O(d^2)$ slowdown of our method caused by (usually univariate) polynomial interpolation,
-and is likely significantly faster when it applies.  However, the geometric perturbations and the analysis of their effect on the predicates must be performed separately for each
+by a sequence of carefully chosen, geometrically meaningful perturbations.  Their approach replaces the $O(d)$ slowdown of the first perturbation level with a predicate dependent
+slowdown, and may be faster than our method when it applies.  However, the geometric perturbations and the analysis of their effect on the predicates must be performed separately for each
 predicate, which complicates the design of algorithms and is a likely source of complexity during implementation and debuggging.  Moreover, since the perturbations depend on the
-algorithm, chaining two algorithms together requires adjusting the perturbations to be compatible.  Interestingly, their approach shares with ours (and indeed
-with Yap's) the idea of a sequence of ``increasingly small'' perturbations, applied one at a time until a nonsingular result is obtained.
+algorithm, chaining two algorithms together requires adjusting the perturbations to be compatible.  Their approach shares with ours (and indeed
+with Yap's) the idea of a sequence of increasingly small perturbations, applied one at a time until a nonsingular result is obtained.
 
 Finally, we address a common complaint against symbolic perturbation, namely that a complicated postprocessing step is required to obtain the ``exact'' answer from the
 perturbed result.  We believe that in the vast majority of applications which might benefit from a more exact answer, what it is actually desired is something much
-stronger: a finitely nondegenerate geometric structure with no small triangles, sharp angles, etc.\  Thus, in practice, an exactly computed geometric result may need to
-be followed by mesh simplification, smoothing, etc.\ (possibly followed by further exact algorithms), and that this extra work is the same whether or not exact degeneracies are
+stronger: a finitely nondegenerate geometric structure with no small triangles, sharp angles, etc.\  In practice, an exactly computed geometric result may need to
+be followed by mesh simplification, smoothing, etc.\ (possibly followed by further exact algorithms), and this extra work is the same whether or not exact degeneracies are
 treated specially.
 
 \section{Implementation}
 
-A C++ implementation of our symbolic perturbation technique is available under a BSD license at \url{https://github.com/otherlab/core/tree/exact} (see commit 7baac83f65105b$\ldots$
-for the version at the time of this writing (\TODO: update)).  The code includes three algorithms built on top of the perturbation core: Delauany triangulation,
-Boolean operations on polygons, and Boolean operations on polygons built from circular arcs.  We plan to expand the set of implemented algorithms and use them for various tasks
-in CAD/CAM such as shape decomposition for manufacturing and motion planning (\TODO: Add citations).
+A C++ implementation of our symbolic perturbation technique is available under a BSD license at \url{https://github.com/otherlab/core/tree/exact} (see 
+\url{https://github.com/otherlab/core/commit/dc0f10918d17507d} for the version at the time of this writing).  The code includes three algorithms built on top of the perturbation
+core: Delauany triangulation, Boolean operations on polygons, and Boolean operations on polygons built from circular arcs.  We plan to expand the set of implemented algorithms
+and use them for various tasks in CAD/CAM such as shape decomposition for manufacturing and motion planning (\TODO: Add citations).  Benchmarks and plotting scripts used for the
+paper are available along with the paper source at \url{https://github.com/otherlab/perturb}.
 
 For simplicity and speed, our implementation quantizes all input coordinates to the integer range $[-2^{53},2^{53}]$, the largest range of integers exactly representable in
-double precision.  This allows us to use fast interval arithmetic filters (\TODO: cite), falling back to exact evaluation using GMP if the filter fails (\TODO: cite), falling back
+double precision.  This allows use of fast interval arithmetic filters (\TODO: cite), falling back to exact integer evaluation using GMP if the filter fails (\TODO: cite), falling back
 to symbolic perturbation if the exact answer is zero.  The polynomial is provided as a black box evaluation routine (see \verb+exact/perturb.h+ in the code).  For multivariate
 interpolation we evaluate $f_k(\epsilon_1, \ldots, \epsilon_k)$ on our fixed set of $(\epsilon_1, \ldots, \epsilon_k)$ tuples, use the algorithm of \cite{neidinger2009multivariable}
 to map into the Newton basis, then expand into the monomial basis.  It is possible to perform all computations required for polynomial interpolation using integers only; see \autoref{polynomial}.
+To avoid a significant slowdown due to memory allocation inside GMP, the final version was written using manual memory allocation and the low level interface to GMP.
 
 In addition to computing the perturbed signs of polynomial predicates, we use our scheme to compute exactly rounded perturbed constructions.  Given a rational function $f(x)/g(x)$
 with $g(x) = 0$, we compute the perturbation series $g_1, g_2, \ldots$ until we find a nonzero $g_k$, compute the perturbed numerator $f_k$, then evaluate the perturbed result as
@@ -222,10 +233,10 @@ We emphasize that these perturbed constructions are (except for the final roundi
 invariants that apply in the exact case (again, except for the rounding).  For example, the union of a convex polygon with itself will remain nearly convex, and in particular will
 avoid (all but extremely tiny) foldovers that might result from performing constructions with floating point arithmetic when an algorithm completes.  Moreover, since they
 are guaranteed to be within distance $1/2$ of the true answer, they can be fed back into the same algorithm as tight interval bounds without fear of introducing inconsistencies.  Our
-circular arc Boolean code makes use of this to perform more accurate interval-based filtering.  For example, when comparing the $y$ coordinates of different intersections of circles,
+circular arc Boolean code makes use of this to perform more accurate interval-based filtering.  For example, when comparing $y$ coordinates of different intersections of circles,
 we precompute the rounded intersections and avoid costly polynomial evaluation if the rounded coordinates differ.
 
-Debugging and testing the symbolically perturbed algorithms we have implemented so far has been quite a pleasant experience.  Once the perturbation core itself is trusted,
+Debugging and testing the symbolically perturbed algorithms we have implemented so far has been a quite pleasant experience.  Once the perturbation core itself is trusted,
 bugs in the surrounding algorithm necessarily manifest on a set of positive measure, and therefore are likely to be found by running the algorithm on random input.  In contrast, an
 algorithm which handles degeneracies specially or tailors the perturbation to the predicates involved must actually test each kind of degeneracy when debugging the algorithm.
 Any speedup logic such as interval filtering can be easily checked by including a compile time flag to unconditionally evaluate both fast and slow paths.  This tests both the
@@ -238,22 +249,63 @@ The identity test evaluates the polynomial on 20 random points; this produces a 
 lifetime of the code), and always reports failure for a truly zero polynomial.  The check has negligable effect on overall cost, since usually $f_1 \ne 0$.
 
 Our geometric algorithms themselves are unremarkable: we use \cite{amenta2003incremental} for Delaunay triangulation and compute Boolean operations using axis-aligned bounding
-box hierarchies to find intersections and then fire rays along the $x$-axis to get winding numbers for each contour (the $x$-axis is safe due to symbolic perturbation).  Our Delaunay
+box hierarchies to find intersections and rays traced along horizontal lines to find winding numbers for each contour (horizontal lines are safe due to symbolic perturbation).  Our Delaunay
 triangulation algorithm is $O(n \log n)$ for arbitrarily degenerate input, and happily computes a random but valid Delaunay triangulation if all points are at the origin.  Our current Boolean
-operation algorithms degrade to $O(n^2)$ for fully degenerate input since they compute an arrangement of curves as the first step; this slowdown is independent of the perturbation
-technique used, and also occurs for badly formed nondegenerate input.  Our current implementation of circular arc Booleans uses predicates of degree up to 20, but this is reducible 
-to degree 12 as discussed in \cite{devillers2000algebraic}, or to degree 6 using a combination of polynomial factoring and algorithmic changes (see \autoref{predicates}).  Even
-degree 6 is problematic for Yap's scheme due to the worst case exponential blowup in the number of terms.  Finally, we note similar work in CGAL on circle arrangements in
-\cite{wein2006circles}; this is orthogonal to the contribution of our work.
+operation algorithms degrade to $O(n^2 \log n)$ for fully degenerate input since they compute an arrangement of curves as the first step; this slowdown is independent of the perturbation
+technique used, and also occurs for badly formed nondegenerate input.  Compared to \cite{devillers2000algebraic}, which used degree 12 predicates for circular arc arrangements,
+our implementation uses predicates of degree at most 8 using a combination of polynomial factoring and algorithmic changes (see \autoref{sec:predicates}).  Even degree 8 is problematic
+for Yap's scheme due to the worst case exponential blowup in the number of terms.  We note similar work in CGAL on circle arrangements in \cite{wein2006circles}; this is orthogonal to our contribution.
 
-\TODO: Include a figure of circles
+\section{Results} \label{sec:results}
 
-\TODO: What performance results to include?
+\begin{figure}
+\centering
+\includegraphics[height=.37\columnwidth]{delaunay-normal.png}
+\includegraphics[height=.42\columnwidth]{delaunay-time.pdf}%
+\begin{picture}(0,0)
+\put(-170,110){{\small slope $1.071$}} % origin
+\put(-115,65){{\small slope $1.070$}}  % random
+\end{picture}
+\cprotect\caption{Left: Delaunay triangulation of 2000 normally distributed points.  Right: computation time for Delaunay triangulation of (green, lower) $n$ normally distributed points
+and (blue, upper) $n$ copies of the origin.  The fully degenerate case ranges from $13.1$ to $15.5$ times as slow as the random case, due to falling back from interval
+arithmetic filters to integer computation and symbolic perturbation.  To reproduce these figures, run \verb+examples delaunay --count 2000 --plot 1+ and
+\verb+examples delaunay --count 1000000+.}
+\label{fig:delaunay}
+\end{figure}
+
+Results for Delaunay triangulation are shown in \autoref{fig:delaunay}.  Since our algorithm is worst case $O(n \log n)$ independent of degeneracies, the slowdown from random
+input to fully degenerate input (all points at the origin) is constant: between $13$ and $15.5$ due to falling back from interval arithmetic filters to exact integer computation
+and symbolic perturbation.  We note that our current Delaunay triangulation algorithm is not state of the
+art, though this is orthogonal to our contributions: CGAL's routine is 4.3 times faster on $10^6$ normally distributed points ($0.704$ s vs. $3.05$ s).  It is also dramatically
+faster for all points at the origin ($0.11$ s vs. $43$ s), though only because CGAL prunes duplicate points as a preprocess.  To reproduce our CGAL benchmarks, run
+\verb+examples delaunay --count 1000000 --cgal 1+.
+
+\begin{figure}
+\centering
+\includegraphics[height=.37\columnwidth]{random-circles.png}
+\includegraphics[height=.37\columnwidth]{circles-time.pdf}
+\begin{picture}(0,0)
+\put(-150,105){{\small slope $2.275$}} % origin
+\put(-145,70){{\small slope $2.069$}}  % nearly
+\put(-135,30){{\small slope $1.918$}}  % random
+\end{picture}
+\cprotect\caption{Left: Boolean union of 1000 randomly chosen circular arc 4-gons.  Right: computation time for union of different numbers of (red, lower) randomly distributed
+4-gons, (green, middle) nearly but not exactly degenerate 4-gons, and (blue, top) exactly degenerate 4-gons.  The exactly degenerate case ranges from 65 to 252 times slower
+than the nearly degenerate case, which is as expected since most of the cost is in degree 6 or 8 predicates ($6^3 = 216$, $8^3 = 512$).  Both random and nearly degenerate cases
+use almost entirely interval arithmetic; the latter is slower since it is closer to the quadratic worst case.  To reproduce these figures, run
+\verb+examples circles --plot 1 --count 1000+ and \verb+examples --mode circles --count 1000 --min-count 10+}
+\label{fig:circles}
+\end{figure}
+
+Results for circular arc Booleans are shown in \autoref{fig:circles}.  Log-log slopes near 2 are expected because of the $O(n^2)$ complexity of general arrangements of circles.
+The slowdown for the exactly vs.\ nearly degenerate case is much greater than for Delaunay triangulation because of the higher degree and increased complexity of the predicates.
+Further optimizations to the degenerate case are possible, in particular inlining GMP calls for small arguments and caching certain repeated predicate evaluations, but these are
+of questionable importance in practice since a tiny amount of finite jittering removes the vast majority of degeneracies.
 
 \section{Conclusion}
 
 We have presented a deterministic pseudorandom symbolic perturbation scheme which combines the advantages of several existing techniques.  Given a polynomial $f(x)$, we evaluate
-the sign of $f(x + \epsilon_1 y_1 + \epsilon_2 y_2 + \cdots)$ where $y_k$ are deterministic pseudorandom random and $\epsilon_k$ are infinitesimals in decreasing order of size.
+the sign of $f(x + \epsilon_1 y_1 + \epsilon_2 y_2 + \cdots)$ where $y_k$ are deterministic pseudorandom and $\epsilon_k$ are infinitesimals in decreasing order of size.
 Typically only the first infinitesimal in this series need be considered, so our method is as fast as the linear symbolic perturbation schemes, but works for arbitrary
 polynomials and appears deterministic to the caller.
 
@@ -263,7 +315,9 @@ polynomials and appears deterministic to the caller.
 
 \section{Polynomial interpolation} \label{polynomial}
 
-We found several useful papers discussing different aspects of univariate and multivariate polynomial interpolation, and collect these results here for convenience.
+We found several useful papers discussing different aspects of univariate and multivariate polynomial interpolation, and collect these results for convenience.  The algorithms
+discussed here perform $O(N^2)$ linear operations to convert $N$ samples to $N$ coefficients.  Adds and multiply-by-constants for degree $d$ integers require time $O(d)$, so
+the total complexity is $O(d N^2)$.  Asymptotically faster algorithms using spectral methods exist, but we do not consider them for simplicity.
 
 In order to recover the coefficients of $f_k(\epsilon_1, \ldots, \epsilon_k)$ we must perform multivariate interpolation given the values of $f_k$ at our chosen set of tuples.
 In the univariate case, this amounts to the classical divided difference algorithm.  As discussed in \cite{oruc2000explicit} and \cite{olver2006multivariate}, the divided
@@ -289,7 +343,9 @@ we can use the fact while the inverse of the Vandermonde matrix is not integer, 
 are integers.  It turns out that in this case all intermediate results in the divided difference algorithm are integers as well.  To show this, we must prove that the $k$th forward
 difference $\Delta^k f(x)$ of an integer polynomial is divisible by $k!$.  We use the following argument due to Qiaochu Yuan\footnote{\url{http://math.stackexchange.com/questions/413600}}.
 Since the transformation to and from the monomial basis to Newton basis (the second half of \autoref{vandermonde}) is integral, it suffices to check $k! \mid \Delta^k f(x)$ for an
-element of the Newton basis $f(x) = x(x-1)\cdots(x-n+1) = n!\binom{x}{n}$.  Since $\Delta \binom{x}{n} = \binom{x}{n-1}$, we have
+element of the Newton basis
+$$f(x) = x(x-1)\cdots(x-n+1) = n!\binom{x}{n}.$$
+Since $\Delta \binom{x}{n} = \binom{x}{n-1}$ we have
 \begin{align*}
 \Delta^k x(x-1)\cdots(x-(n-1))
   &= n! \binom{x}{n-k} \\
@@ -304,16 +360,15 @@ $$\prod_i x_i(x_i-1)\cdots(x_i-(n_i-1))$$
 which corresponds to the first half of \autoref{vandermonde}.  The multivariate generalization of the second half of \autoref{vandermonde} is easy, since the multivariate Newton to
 monomial basis transformation matrix factors into commuting matrices each expanding one variable, and these matrices are block diagonal with respect to the other variables.
 
-\section{Degree 6 circular arc predicates} \label{predicates}
+\section{Degree 8 circular arc predicates} \label{sec:predicates}
 
-Our current implementation of circular arc polynomial Booleans predicates up to the degree 20.  Although our method handles high degree predicates without difficulty, they are
-naturally slower, and it is natural to look for lower degree versions.  Indeed, \cite{devillers2000algebraic} show that the critical predicate, comparing the $y$ coordinates of
-two intersections of two different pairs of circles $C_0,C_1$ and $C_2,C_3$, can be reduced to degree 12 using resultant techniques.  We believe this is optimal for that predicate, since the resulting
-polynomial is irreducible over $\Q$.  However, to compute a circular arc arrangements it suffices to consider the case where $C_0 = C_2$; that is, comparing the $y$ coordinates
-of the intersections of one circle with two others.  In this case, the polynomials can be factored into terms with degree $\le 6$.  One significant algorithmic change is required,
+\cite{devillers2000algebraic} show that the critical predicate required for circular arc arrangments, answering whether one intersection of two arcs is above another intersection,
+can be reduced to degree 12 using resultant techniques.  They derived their results for the general case of two unrelated intersections, between pairs of circles
+$C_0,C_1$ and $C_2,C_3$.  However, to compute a circular arc arrangement it suffices to consider the case where $C_0 = C_2$; that is, comparing the $y$ coordinates of the
+intersections of one circle with two others.  In this case, the polynomials can be factored into terms of degree $\le 8$.  One significant algorithmic change is required,
 since we can no longer fire a horizontal or vertical ray from the intersection of $C_0,C_1$ and detect intersections against unrelated circle intersections.  Instead, we must fire
-rays from exactly known (degree 1) $y$ coordinates, which is sufficient to determine the winding number of a given circular arc polygon (or connected component of an arrangement)
-as long as the bounding box touches at least one such ray.  For most applications, polygons smaller than this may be safely discarded.
+rays from exactly known (degree 1) $y$ coordinates, which is sufficient to determine the winding number of a given circular arc polyon (or connected component of an arrangement)
+as long as the bounding box touches at least one ray.  For most applications, polygons smaller than this may be safely discarded.
 
 \TODO: Pull over actual factorization
 
