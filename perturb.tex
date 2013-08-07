@@ -212,12 +212,12 @@ treated specially.
 A C++ implementation of our symbolic perturbation technique is available under a BSD license at \url{https://github.com/otherlab/core/tree/exact} (see 
 \url{https://github.com/otherlab/core/commit/dc0f10918d17507d} for the version at the time of this writing).  The code includes three algorithms built on top of the perturbation
 core: Delauany triangulation, Boolean operations on polygons, and Boolean operations on polygons built from circular arcs.  We plan to expand the set of implemented algorithms
-and use them for various tasks in CAD/CAM such as shape decomposition for manufacturing and motion planning (\TODO: Add citations).  Benchmarks and plotting scripts used for the
+and use them for various tasks in CAD/CAM such as shape decomposition for manufacturing and motion planning.  Benchmarks and plotting scripts used for the
 paper are available along with the paper source at \url{https://github.com/otherlab/perturb}.
 
 For simplicity and speed, our implementation quantizes all input coordinates to the integer range $[-2^{53},2^{53}]$, the largest range of integers exactly representable in
-double precision.  This allows use of fast interval arithmetic filters (\TODO: cite), falling back to exact integer evaluation using GMP if the filter fails (\TODO: cite), falling back
-to symbolic perturbation if the exact answer is zero.  The polynomial is provided as a black box evaluation routine (see \verb+exact/perturb.h+ in the code).  For multivariate
+double precision.  This allows use of fast interval arithmetic filters \cite{bronnimann2001interval}, falling back to exact integer evaluation using GMP if the filter fails \cite{granlund2012gmp},
+falling back to symbolic perturbation if the exact answer is zero.  The polynomial is provided as a black box evaluation routine (see \verb+exact/perturb.h+ in the code).  For multivariate
 interpolation we evaluate $f_k(\epsilon_1, \ldots, \epsilon_k)$ on our fixed set of $(\epsilon_1, \ldots, \epsilon_k)$ tuples, use the algorithm of \cite{neidinger2009multivariable}
 to map into the Newton basis, then expand into the monomial basis.  It is possible to perform all computations required for polynomial interpolation using integers only; see \autoref{polynomial}.
 To avoid a significant slowdown due to memory allocation inside GMP, the final version was written using manual memory allocation and the low level interface to GMP.
@@ -293,7 +293,7 @@ faster for all points at the origin ($0.11$ s vs. $43$ s), though only because C
 4-gons, (green, middle) nearly but not exactly degenerate 4-gons, and (blue, top) exactly degenerate 4-gons.  The exactly degenerate case ranges from 65 to 252 times slower
 than the nearly degenerate case, which is as expected since most of the cost is in degree 6 or 8 predicates ($6^3 = 216$, $8^3 = 512$).  Both random and nearly degenerate cases
 use almost entirely interval arithmetic; the latter is slower since it is closer to the quadratic worst case.  To reproduce these figures, run
-\verb+examples circles --plot 1 --count 1000+ and \verb+examples --mode circles --count 1000 --min-count 10+}
+\verb+examples circles --plot 1 --count 1000+ and \verb+examples --mode circles --count 1000 --min-count 10+.}
 \label{fig:circles}
 \end{figure}
 

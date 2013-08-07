@@ -35,8 +35,8 @@
 \newcommand{\TODO}{{\color{red} TODO}}
 
 \title{Circular arc predicates}
-\author{Geoffrey Irving\thanks{Email: irving@naml.us, Otherlab, San Francisco, CA, United States}
-\and Forrest Green\thanks{\TODO}}
+\author{Geoffrey Irving\thanks{Email: irving@naml.us, forrest@otherlab.com, Otherlab, San Francisco, CA, United States}
+\and Forrest Green$^*$}
 \date{Version 1, \today}
 
 \begin{document}
@@ -44,15 +44,17 @@
 
 \section{Circular arc predicates}
 
+Here are most of the predicates required for circular arc Booleans:
+
 \subsection{Do two circles intersect?}
 
 Let's work out all the predicates we need for circular arc booleans in the plane.  Let $S_i = (c_i,r_i)$ be the $i$th
 circle with center $c_i$ and radius $r_i$.  Circles $S_0$ and $S_1$ intersect iff
 $$ | r_1 - r_0 | < |\Delta c| < r_1 + r_0. $$
 Since all quantities are positive, we can square to get
-\begin{align} \label{two-circles}
+\begin{align*}
 (r_1 - r_0)^2 < \Delta c^2 < (r_1 + r_0)^2
-\end{align}
+\end{align*}
 where both inequalities are degree two polynomial predicates.
 
 \subsection{One intersection of two circles}
@@ -62,129 +64,45 @@ of $S_0,S_1$ to the left of line $c_0c_1$.  We have
 \begin{align*}
 x_{01} &= (1-\alpha) c_0 + \alpha c_1 + \beta \Delta c^\perp \\
 (x_{01} - c_i)^2 &= r_i^2 \\
-x_{01}^2 - 2x_{01} \cdot c_i + c_i^2 = r_i^2.
+x_{01}^2 - 2x_{01} \cdot c_i + c_i^2 &= r_i^2.
 \end{align*}
 Subtracting the two circle equations gives
 \begin{align*}
--2x_{01} \cdot \Delta c + c_1^2 - c_0^2 = r_1^2 - r_0^2 \\
+-2x_{01} \cdot \Delta c + c_1^2 - c_0^2 &= r_1^2 - r_0^2 \\
 -2c_0 \cdot \Delta c -2\alpha {\Delta c}^2 + (c_0 + c_1) \cdot \Delta c &= r_1^2 - r_0^2 \\
 (1-2\alpha) {\Delta c}^2 &= r_1^2 - r_0^2 \\
-1 - 2 \alpha &= \frac{r_1^2 - r_0^2}{\Delta c^2}
-\end{align*}
-Let
-$$\gamma = \frac{1 - 2\alpha}{2} = \frac{r_1^2 - r_0^2}{2\Delta c^2}$$
-so that $\alpha = 1/2 - \gamma$ and
-\begin{align*}
-x_{01} &= (1-1/2 + \gamma) c_0 + (1/2 - \gamma) c_1 + \beta \Delta c^\perp \\
-       &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp
+1 - 2 \alpha &= \frac{r_1^2 - r_0^2}{\Delta c^2} \\
+\alpha &= \frac{\Delta c^2 + r_0^2 - r_1^2}{2 \Delta c^2}
 \end{align*}
 Substituting into $S_0$'s equation gives
 \begin{align*}
 (x_{01} - c_0)^2 &= r_0^2 \\
-\left((1/2 - \gamma) \Delta c + \beta \Delta c^\perp \right)^2 &= r_0^2 \\
-(1/2 - \gamma)^2 \Delta c^2 + \beta^2 \Delta c^2 &= r_0^2 \\
-\beta^2 &= \frac{r_0^2}{\Delta c^2} - (1/2 - \gamma)^2 \\
+\left(\alpha \Delta c + \beta \Delta c^\perp \right)^2 &= r_0^2 \\
+\alpha^2 \Delta c^2 + \beta^2 \Delta c^2 &= r_0^2 \\
+\beta^2 &= \frac{r_0^2}{\Delta c^2} - \alpha^2 \\
 \beta^2 &= \frac{r_0^2}{\Delta c^2} - \left(\frac{\Delta c^2 - r_1^2 + r_0^2}{2 \Delta c^2}\right)^2 \\
 4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \left( \Delta c^2 - r_1^2 + r_0^2 \right)^2
 \end{align*}
-To recap, the intersection between circles $S_0$ and $S_1$ is described by
+If we define
+\begin{align*}
+\hat{\alpha} &= 2 \Delta c^2 \alpha \\
+\hat{\beta} &= 2 \Delta c^2 \beta
+\end{align*}
+then the intersection between circles $S_0$ and $S_1$ is described by
 \begin{align*}
 x_{01} &= c_0 + \alpha \Delta c + \beta \Delta c^\perp \\
-       &= \bar{c} - \gamma \Delta c + \beta \Delta c^\perp \\
 \hat{\alpha} = 2 \alpha \Delta c^2 &= \Delta c^2 - r_1^2 + r_0^2 \\
-\hat{\gamma} = 2 \gamma \Delta c^2 &= r_1^2 - r_0^2 \\
 \hat{\beta}^2 = 4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \hat{\alpha}^2
 \end{align*}
-where $^\perp$ rotates left by $90^\circ$ and we choose the positive square root for $\beta$.
-
-\subsection{Is the intersection of two circles inside a third?}
-
-Substituting $x_{01}$ into the equation for circle $S_2$ gives
-\begin{align*}
-(x_{01} - c_2)^2 &< r_2^2 \\
-(c_0 + \alpha c_{01} + \beta c_{01}^\perp - c_2)^2 &< r_2^2 \\
-(\alpha c_{01} + \beta c_{01}^\perp - c_{02})^2 &< r_2^2 \\
-\alpha^2 c_{01}^2 + \beta^2 c_{01}^2 + c_{02}^2 - 2 \alpha c_{01}\cdot c_{02} - 2 \beta c_{01}\times c_{02} &< r_2^2 \\
-4\alpha^2 c_{01}^4 + 4\beta^2 c_{01}^4 + 4c_{01}^2 c_{02}^2 - 8 \alpha c_{01}^2 c_{01}\cdot c_{02} - 8 \beta c_{01}^2 c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
-\hat{\alpha}^2 + \hat{\beta}^2 + 4c_{01}^2 c_{02}^2 - 4 \hat{\alpha} c_{01}\cdot c_{02} - 4 \hat{\beta} c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
-4 r_0^2 c_{01}^2 + 4 c_{01}^2 c_{02}^2 - 4 \hat{\alpha} c_{01}\cdot c_{02} - 4 \hat{\beta} c_{01}\times c_{02} &< 4r_2^2 c_{01}^2 \\
-r_0^2 c_{01}^2 + c_{01}^2 c_{02}^2 - \hat{\alpha} c_{01}\cdot c_{02} - \hat{\beta} c_{01}\times c_{02} &< r_2^2 c_{01}^2 \\
-c_{01}^2 (c_{02}^2 + r_0^2 - r_2^2) - \hat{\alpha} c_{01}\cdot c_{02} - \hat{\beta} c_{01}\times c_{02} &< 0 \\
-\hat{\alpha}_{02} c_{01}^2 - \hat{\alpha}_{01} c_{01}\cdot c_{02} - \hat{\beta}_{01} c_{01}\times c_{02} &< 0 \\
-\hat{\alpha}_{01} c_{01}\cdot c_{02} - \hat{\alpha}_{02} c_{01}^2 + \hat{\beta}_{01} c_{01}\times c_{02} &> 0 \\
-\end{align*}
-
-\subsection{Are the intersections of two circles with a third counterclockwise?}
-
-Alternatively, given three circles $S_0, S_1, S_2$, we ask whether $x_{01}$ occurs to the right of $x_{02}$.  Equivalently, do we have
-\begin{align*}
-(x_{01} - c_0) \times (x_{02} - c_0) &> 0 \\
-(\alpha_1 \Delta c_1 + \beta_1 \Delta c_1^\perp) \times (\alpha_2 \Delta c_2 + \beta_2 \Delta c_2^\perp) &> 0 \\
-(\alpha_1 \alpha_2 + \beta_1 \beta_2) \Delta c_1 \times \Delta c_2 + (\alpha_1 \beta_2 - \beta_1 \alpha_2) \Delta c_1 \cdot \Delta c_2 &> 0
-\end{align*}
-Multiply through by $4 \Delta c_1^2 \Delta c_2^2$ to clear nonconstant fractions to get
-\begin{align} \label{circle-order}
-(\alpha'_1 \alpha'_2 + \beta'_1 \beta'_2) \Delta c_1 \times \Delta c_2 + (\alpha'_1 \beta'_2 - \beta'_1 \alpha'_2) \Delta c_1 \cdot \Delta c_2 &> 0
-\end{align}
-This has the form
-$$a_6 + a_4 \sqrt{b_4} + a_4 \sqrt{b_4} + a_2 \sqrt{b_4} \sqrt{b_4}$$
-where subscript $k$ denotes degree $k$.  This matches lemma (5) from "On the Degree of Standard Geometric Predicates for Line Transversals in 3D", so the final predicate degree is 24.
-
-Finally, we need a much simpler version of (\ref{circle-order}) where the second direction is one of the coordinate axes, call it $e$:
-\begin{align*}
-e \times (x_{01} - c_0) &> 0 \\
-e \times (\alpha \Delta c + \beta \Delta c^\perp) &> 0 \\
-e \times (\hat{\alpha} \Delta c + \hat{\beta} \Delta c^\perp) &> 0 \\
-\hat{\alpha} e \times \Delta c &> -\hat{\beta} e \cdot \Delta c \\
-\hat{\alpha}^2 (e \times \Delta c)^2 &> \hat{\beta}^2 (e \cdot \Delta c)
-\end{align*}
-where the last equation is correct only for appropriate sign configurations.
+where $^\perp$ rotates left by $90^\circ$ and we choose the positive or negative square root for $\beta$ depending on which intersection is desired.
 
 \subsection{Is one circle intersection above another?}
 
-Given four circles $S_0$ through $S_3$, is $x_{01}$ below $x_{23}$?  This predicate has the form
+Given three circles $S_0$ through $S_3$, is $x_{01}$ below $x_{23}$?  This predicate has the form
 \begin{align*}
 c_0^y + \alpha_{01} c_{01}^y + \beta_{01} c_{01}^x &< c_2^y + \alpha_{23} c_{23}^y + \beta_{23} c_{23}^x \\
 0 &< c_{02}^y + \alpha_{23} c_{23}^y - \alpha_{01} c_{01}^y + \beta_{23} c_{23}^x - \beta_{01} c_{01}^x \\
 0 &< 2 c_{02}^y c_{01}^2 c_{23}^2 + \hat{\alpha}_{23} c_{23}^y c_{01}^2 - \hat{\alpha}_{01} c_{01}^y c_{23}^2 + \hat{\beta}_{23} c_{23}^x c_{01}^2 - \hat{\beta}_{01} c_{01}^x c_{23}^2
-\end{align*}
-
-\subsection{Does the horizontal line through one circle intersection intersect another circle?}
-
-In other words, given circles $S_0, S_1, S_2$, do we have
-\begin{align*}
-c_2^y - r_2 &< c_0^y + \alpha c_{01}^y + \beta c_{01}^x < c_2^y + r_2 \\
-2 (c_{02}^y - r_2) c_{01}^2 &< \hat{\alpha} c_{01}^y + \hat{\beta} c_{01}^x < 2 (c_{02}^y + r_2) c_{01}^2
-\end{align*}
-
-\subsection{Is the intersection of a horizontal line through one circle intersection with another circle to the right of the first intersection?}
-
-Given three circles $S_0, S_1, S_2$, where the horizontal line through $x_{01}$ intersects $S_2$ at $p$, we ask whether $x_{01}^x < p^x$.  We have
-\begin{align*}
-p^y &= x_{01}^x \\
-(p - c_2)^2 &= r_2^2 \\
-(p^x - c_2^x)^2 + (x_{01}^y - c_2^y)^2 &= r_2^2 \\
-p^x - c_2^x &= s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2} \\
-p^x &= c_2^x + s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2}
-\end{align*}
-where $s = \pm 1$ depending on which intersection we're considering.  Our predicate is
-\begin{align*}
-x_{01}^x < c_2^x + s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2} \\
-x_{01}^x - c_2^x < s \sqrt{r_2^2 - (x_{01}^y - c_2^y)^2}
-\end{align*}
-Assuming both sides are positive, squaring gives
-\begin{align*}
-(x_{01}^x - c_2^x)^2 &< r_2^2 - (x_{01}^y - c_2^y)^2 \\
-(x_{01}^x - c_2^x)^2 + (x_{01}^y - c_2^y)^2 &< r_2^2 \\
-(x_{01} - c_2)^2 &< r_2^2
-\end{align*}
-which is exactly the question of whether $x_{01}$ is inside $S_2$ as answered above.
-
-Before squaring, the sign of the LHS is given by
-\begin{align*}
-x_{01}^x - c_2^x &> 0 \\
-\alpha c_{01}^x + \beta c_{01}^y - c_2^x &> 0 \\
-\hat{\alpha} c_{01}^x + \hat{\beta} c_{01}^y - 2 c_2^x c_{01}^2 &> 0
 \end{align*}
 
 \subsection{Is the angle at an intersection counterclockwise?}
@@ -225,10 +143,6 @@ c_0^x + \sqrt{r_0^2 - (y-c_0^y)^2} &< c_1^x + \sqrt{r_1^2 - (y-c_1^y)^2} \\
 0 &< c_{01}^x + \sqrt{r_1^2 - (y-c_1^y)^2} - \sqrt{r_0^2 - (y-c_0^y)^2}
 \end{align*}
 
-\section{Circular arc polygons}
-
-Well, those are all the predicates we need for exact circular arc constructive solid geometry.  \TODO: Are those really all we needed?
-
 \section{Precision vs. flatness}
 
 Unfortunately, implicit arcs using integer centers and radii are unable to represent straight lines exactly, raising an issue of precision.
@@ -252,51 +166,6 @@ and this requires raising the integer limit to $2^{26}$ or so.  What can we get 
 requiring no segment to extend more than $1/10$th of the bounding box, and then two orders of magnitude if the bounding box was assumed to be
 only $10$ cm rather than 1 m.
 
-So that's what we'll do, at least for now:
-\begin{itemize}
-\item Ask for a relative accuracy of $10^-5$, corresponding to 1 micron in a 10 cm box.
-\item Subdivide arcs down to 10\% of the bounding box size.
-\item Raise the single precision integer limit from $2^{24}$ to $2^{26}$, abandoning the ``fits within a float'' invariant.
-\end{itemize}
-Additionally, our first implementation will ignore the subdivision step, and therefore achieve only $10^{-4.5}$ accuracy.  All of this stuff
-does leave a bit of a bad taste in one's mouth, but I'll set that aside for now.
-
-\section{Safe quantization}
-
-Suppose we quantize a single circular arc polygon to integer centers $c_i$ and radii $r_i$.  The contour makes sense only if adjacent circles
-actually intersect, so we require
-\begin{align*}
-|r_{i+1} - r_i| < |\Delta c_i| < r_i + r_{i+1}
-\end{align*}
-While it's possible to achieve this, it'd be hard to guarantee that the intersections don't move a lot.
-
-\section{Endpoint-based arc representation}
-
-Just in case, let's talk about endpoint based arc representation.  For stability, we'll arrange things so that arcs subtend under $180^\circ$.
-Thus, arc $(x_0,x_1,x_2)$ moves from $x_0$ to $x_2$ around the circumcircle in whichever way is fastest.
-
-\subsection{Implicitization}
-
-Assuming general position, which we can of course always do, the implicit equation for circle $(x_0,x_1,x_2)$ is
-\begin{align*}
-\det \left(\begin{array}{ccc}
-  x^2 & x & 1 \\
-  x_0^2 & x_0 & 1 \\
-  x_1^2 & x_1 & 1 \\
-  x_2^2 & x_2 & 1
-\end{array} \right ) &= 0 \\
-a_2 x^2 + a_1 \cdot x + a_0 &= 0
-\end{align*}
-where $a_2, a_1, a_0$ have degrees $2, 3, 4$, respectively.  Note: $a_2$ is twice the area of triangle $(x_0,x_1,x_2)$.  Expanding the equation for
-a circle, we have
-\begin{align*}
-(x - c)^2 - r^2 &= 0 \\
-x^2 - 2c \cdot x + c^2 - r^2 &= 0 \\
-a_2 x^2 - 2a_2 c \cdot x + a_2 (c^2 - r^2) &= 0 \\
-\hat{c} = 2 a_2 c &= -a_1 \\
-a_2 r^2 &= a_2 c^2 - a_0 \\
-\hat{r}^2 = 4 a_2^2 r^2 &= 4 a_2^2 c^2 - 4 a_2 a_0 = a_1^2 - 4 a_2 a_0 \\
-\end{align*}
-A rough estimate is that our $24$ degree intersection ordering predicate would become $4(6+12) = 72$ degree.
+It seems like 32 bits aren't working out, so we'll solve the problem by jumping to 64 bits generally.
 
 \end{document}
