@@ -68,7 +68,7 @@ of $S_0,S_1$ to the left of line $c_0c_1$.  Parameterize the intersection by
 \begin{align*}
 x_{01} &= c_0 + \alpha c_{01} + \beta c_{01}^\perp.
 \end{align*}
-We have
+where $v^\perp$ is $v$ rotated left by $90^\circ$.  We have
 \begin{align*}
 (x_{01} - c_i)^2 &= r_i^2 \\
 x_{01}^2 - 2x_{01} \cdot c_i + c_i^2 &= r_i^2.
@@ -95,7 +95,7 @@ x_{01} &= c_0 + \alpha c_{01} + \beta c_{01}^\perp \\
 \halpha = 2 \alpha c_{01}^2 &= c_{01}^2 - r_1^2 + r_0^2 \\
 \hbeta^2 = (2c_{01}^2 \beta)^2 &= 4 r_0^2 c_{01}^2 - \halpha^2
 \end{align*}
-where $^\perp$ rotates left by $90^\circ$ and we choose the positive or negative square root for $\beta$ depending on which intersection is desired.
+where we choose the positive or negative square root for $\beta$ depending on which intersection is desired.
 
 \subsection{Is one circle intersection above another?}
 
@@ -122,11 +122,11 @@ A^2 - B_1^2 C_1 - B_2^2 C_2 &> 2 B_1 B_2 \sqrt{C_1 C_2} \label{two-b}
 \end{align}
 The signs of the RHS's of (\ref{one-b}) and (\ref{two-b}) are known.  The polynomial LHS's are degree 10, but factor as
 \begin{align*}
-\begin{array}{@{}r} A^2 + B_1^2 C_1 - B_2^2 C_2 \phantom{\bigg(} \hspace{-.3em}= \\ \phantom{\bigg(} \end{array}&%
+\begin{array}{@{}r} A^2 + B_1^2 C_1 - B_2^2 C_2 \phantom{\bigg(} \hspace{-.5em}= \\ \phantom{\bigg(} \end{array}&%
 \begin{array}{@{}r@{}l@{}} c_{02}^2 \bigg(& c_{01}^2 \left(\halpha_{02} \left(\halpha_{02} c_{01}^2 - 2 \halpha_{01} c_{01y} c_{02y}\right)
   + 4 r_0^2 (c_{01x}^2 c_{02y}^2 - c_{01y}^2 c_{02x}^2)\right) \\
   &- \halpha_{01}^2 \left(c_{01x}^2 - c_{01y}^2\right) c_{02}^2 \bigg) \end{array} \\
-\begin{array}{@{}r} A^2 - B_1^2 C_1 - B_2^2 C_2 \phantom{\bigg(} \hspace{-.3em}= \\ \phantom{\bigg(} \end{array}&%
+\begin{array}{@{}r} A^2 - B_1^2 C_1 - B_2^2 C_2 \phantom{\bigg(} \hspace{-.5em}= \\ \phantom{\bigg(} \end{array}&%
 \begin{array}{@{}r@{}l@{}} c_{01}^2 c_{02}^2 \bigg(& c_{02}^2 \halpha_{01}^2 + c_{01}^2 \halpha_{02}^2 - 2 c_{01y} c_{02y} \halpha_{01} \halpha_{02} \\
   &- 4 r_0^2 (c_{01y}^2 c_{02x}^2 + c_{01x}^2 c_{02y}^2 + 2c_{01x}^2 c_{02x}^2) \bigg) \end{array}
 \end{align*}
