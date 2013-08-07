@@ -242,6 +242,10 @@ algorithm which handles degeneracies specially or tailors the perturbation to th
 Any speedup logic such as interval filtering can be easily checked by including a compile time flag to unconditionally evaluate both fast and slow paths.  This tests both the
 correctness of the filter and the correctness of the predicate, which is important for complicated polynomial predicates.
 
+Although our currently implemented algorithms are serial, our symbolic perturbation scheme can easily be used in parallel algorithms since each predicate evaluation is deterministic.
+However, the dramatic slowdown between interval filtering and perturbed exact evaluation might interfere with load balancing at very high levels of parallelism, in particular for
+GPU computations.
+
 In a correct geometric algorithm, no polynomial passed to symbolic perturbation will be identical zero; this would correspond to a fundamentally degenerate question such as
 ``Is the triangle $(x_7,x_7,x_7)$ counterclockwise?''.  However, it is extremely convenient for debugging to detect these cases and produce useful output.  Therefore,
 if both $f_1$ and $f_2$ are identically zero, our code pauses to run a randomized polynomial identity check \cite{schwartz1980fast} and throws an exception if a nonzero is not found.
