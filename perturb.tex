@@ -34,6 +34,8 @@
 \newcommand{\rand}{\operatorname{rand}}
 \newcommand{\diag}{\operatorname{diag}}
 \newcommand{\nt}{\negthinspace}
+\newcommand{\halpha}{\hat{\alpha}}
+\newcommand{\hbeta}{\hat{\beta}}
 \newcommand{\TODO}{{\color{red} TODO}}
 \newcommand{\MW}[1]{\textcolor{blue}{\bf[MW: #1]}}
 
@@ -322,7 +324,7 @@ polynomials and appears deterministic to the caller.
 
 We found several useful papers discussing different aspects of univariate and multivariate polynomial interpolation, and collect these results for convenience.  The algorithms
 discussed here perform $O(N^2)$ linear operations to convert $N$ samples to $N$ coefficients.  Adds and multiply-by-constants for degree $d$ integers require time $O(d)$, so
-the total complexity is $O(d N^2)$.  Asymptotically faster algorithms using spectral methods exist, but we do not consider them for simplicity.
+the total complexity is $O(d N^2)$.  Asymptotically faster algorithms using spectral methods exist, but we do not consider them here.
 
 In order to recover the coefficients of $f_k(\epsilon_1, \ldots, \epsilon_k)$ we must perform multivariate interpolation given the values of $f_k$ at our chosen set of tuples.
 In the univariate case, this amounts to the classical divided difference algorithm.  As discussed in \cite{oruc2000explicit} and \cite{olver2006multivariate}, the divided
@@ -367,14 +369,114 @@ monomial basis transformation matrix factors into commuting matrices each expand
 
 \section{Degree 8 circular arc predicates} \label{sec:predicates}
 
-The critical predicate required for circular arc arrangments, answering whether one intersection of two arcs is above another intersection,
+The critical predicate required for circular arc arrangments, determining whether one intersection of two arcs is above another intersection,
 can be reduced to degree 12 using resultant techniques \cite{devillers2000algebraic}.  This holds for the general case of two unrelated intersections between pairs of circles
 $C_0,C_1$ and $C_2,C_3$.  However, to compute a circular arc arrangement it suffices to consider the case where $C_0 = C_2$; that is, comparing the $y$ coordinates of the
 intersections of one circle with two others.  In this case, the polynomials can be factored into terms of degree $\le 8$.  One significant algorithmic change is required,
-since we can no longer fire a horizontal or vertical ray from the intersection of $C_0,C_1$ and detect intersections against unrelated circle intersections.  Instead, we must fire
-rays from exactly known (degree 1) $y$ coordinates, which is sufficient to determine the winding number of a given circular arc polyon (or connected component of an arrangement)
+since we can no longer fire a horizontal or vertical ray from the intersection of $C_0,C_1$ and detect intersections against unrelated circle arcs.  Instead, we must fire
+rays along exactly known (degree 1) $y$ coordinates, which is sufficient to determine the winding number of a given circular arc polyon (or connected component of an arrangement)
 as long as the bounding box touches at least one ray.  For most applications, polygons smaller than this may be safely discarded.
 
-\TODO: Pull over actual factorization
+We derived the degree 8 version of the predicate by starting with an inequality involving square roots, then iteratively checking polynomial signs and squaring to eliminate
+square roots until a fully polynomial inequality is reached.  All polynomials to be tested were then factored in Mathematica down to their minimal degree, then manually simplified
+down to the more compact expressions shown below (Mathematica's \verb+FullSimplify+ was insufficient for this purpose), using Mathematica to check each stage of the simplification.
+The resultant techniques used in \cite{devillers2000algebraic} would have also found the degree 8 solution had they been applied to the three circle special case.  It should be possible
+to automate the entire process from algebraic inequality to optimized minimum degree polynomial expressions, but we have not yet done so.
+
+The derivations below make several simplifications, for example assuming that squaring does not reverse the direction of inequalities.  For full details, refer to
+\url{https://github.com/otherlab/core/blob/b186ab68303/exact/circle_predicates.cpp#L289} or \verb+circles.nb+ in \url{https://github.com/otherlab/perturb}.
+
+\subsection{The intersection of two circles}
+
+Let circle $C_i$ have center $c_i$ and radius $r_i$, and define $c_{ij} = c_j - c_i$.  Assuming $C_0$ and $C_1$ intersect, parameterize one of their intersections by
+\begin{align*}
+p_{01} &= c_0 + \alpha c_{01} + \beta c_{01}^\perp.
+\end{align*}
+where $v^\perp$ is $v$ rotated left by $90^\circ$.  We have
+\begin{align*}
+(p_{01} - c_i)^2 &= r_i^2 \\
+p_{01}^2 - 2p_{01} \cdot c_i + c_i^2 &= r_i^2.
+\end{align*}
+Subtracting the two circle equations gives
+\begin{align*}
+-2p_{01} \cdot c_{01} + c_1^2 - c_0^2 &= r_1^2 - r_0^2 \\
+-2c_0 \cdot c_{01} -2\alpha c_{01}^2 + (c_0 + c_1) \cdot c_{01} &= r_1^2 - r_0^2 \\
+(1-2\alpha) c_{01}^2 &= r_1^2 - r_0^2 \\
+1 - 2 \alpha &= \frac{r_1^2 - r_0^2}{c_{01}^2} \\
+\halpha = 2 c_{01}^2 \alpha &= c_{01}^2 + r_0^2 - r_1^2
+\end{align*}
+Substituting into $C_0$'s equation gives
+\begin{align*}
+(p_{01} - c_0)^2 &= r_0^2 \\
+\left(\alpha c_{01} + \beta c_{01}^\perp \right)^2 &= r_0^2 \\
+\alpha^2 c_{01}^2 + \beta^2 c_{01}^2 &= r_0^2 \\
+\beta^2 &= \frac{r_0^2}{c_{01}^2} - \alpha^2 \\
+\hbeta^2 = \left(2 c_{01}^2 \beta\right)^2 &= 4 r_0^2 c_{01}^2 - \halpha^2.
+\end{align*}
+To summarize, the intersection between circles $C_0$ and $C_1$ is described by
+\begin{align*}
+p_{01} &= c_0 + \alpha c_{01} + \beta c_{01}^\perp \\
+\halpha = 2 \alpha c_{01}^2 &= c_{01}^2 - r_1^2 + r_0^2 \\
+\hbeta^2 = (2c_{01}^2 \beta)^2 &= 4 r_0^2 c_{01}^2 - \halpha^2
+\end{align*}
+where we choose the positive or negative square root for $\beta$ depending on which intersection is desired.
+
+\subsection{Is one circle intersection above another?}
+
+Given three circles $C_0,C_1,C_2$, is $p_{01}$ below $p_{02}$?  This predicate has the form
+\begin{align*}
+p_{01y} &< p_{02y} \\
+c_{0y} + \alpha_{01} c_{01y} + \beta_{01} c_{01x} &< c_{0y} + \alpha_{02} c_{02y} + \beta_{02} c_{02x} \\
+0 &< \alpha_{02} c_{02y} - \alpha_{01} c_{01y} - \beta_{01} c_{01x} + \beta_{02} c_{02x} \\
+0 &< \halpha_{02} c_{02y} c_{01}^2 - \halpha_{01} c_{01y} c_{02}^2 - \hbeta_{01} c_{01x} c_{02}^2+ \hbeta_{02} c_{02x} c_{01}^2 \\
+0 &< A + B_1 \sqrt{C_1} + B_2 \sqrt{C_2}
+\end{align*}
+where $A,B_1,B_2,C_1,C_2$ are polynomials and $C_1, C_2 > 0$ since the two intersections are assumed to exist.  To reduce this equality to
+purely polynomial equalities, we first compute the signs of $A, B_1, B_2$.  If these all match, we are done.  Otherwise we move the square root
+terms that differ from $A$ in sign to the RHS and square.  Assuming $A > 0$, this gives either
+\begin{align}
+A + B_1 \sqrt{C_1} &> -B_2 \sqrt{C_2} \nonumber \\
+A^2 + B_1^2 C_1 + 2 A B_1 \sqrt{C_1} &> B_2^2 C_2 \nonumber \\
+A^2 + B_1^2 C_1 - B_2^2 C_2 &> -2 A B_1 \sqrt{C_1} \label{one-b}
+\end{align}
+or
+\begin{align}
+A &> -B_1 \sqrt{C_1} - B_2 \sqrt{C_2} \nonumber \\
+A^2 &> B_1^2 C_1 + B_2^2 C_2 + 2 B_1 B_2 \sqrt{C_1 C_2} \nonumber \\
+A^2 - B_1^2 C_1 - B_2^2 C_2 &> 2 B_1 B_2 \sqrt{C_1 C_2} \label{two-b}
+\end{align}
+The signs of the RHS's of (\ref{one-b}) and (\ref{two-b}) are known.  The polynomial LHS's are degree 10, but factor as
+\begin{align*}
+\begin{array}{@{}r} A^2 + B_1^2 C_1 - B_2^2 C_2 \phantom{\bigg(} \hspace{-.5em}= \\ \phantom{\bigg(} \end{array}&%
+\begin{array}{@{}r@{}l@{}} c_{02}^2 \bigg(& c_{01}^2 \left(\halpha_{02} \left(\halpha_{02} c_{01}^2 - 2 \halpha_{01} c_{01y} c_{02y}\right)
+  + 4 r_0^2 (c_{01x}^2 c_{02y}^2 - c_{01y}^2 c_{02x}^2)\right) \\
+  &- \halpha_{01}^2 \left(c_{01x}^2 - c_{01y}^2\right) c_{02}^2 \bigg) \end{array} \\
+\begin{array}{@{}r} A^2 - B_1^2 C_1 - B_2^2 C_2 \phantom{\bigg(} \hspace{-.5em}= \\ \phantom{\bigg(} \end{array}&%
+\begin{array}{@{}r@{}l@{}} c_{01}^2 c_{02}^2 \bigg(& c_{02}^2 \halpha_{01}^2 + c_{01}^2 \halpha_{02}^2 - 2 c_{01y} c_{02y} \halpha_{01} \halpha_{02} \\
+  &- 4 r_0^2 (c_{01y}^2 c_{02x}^2 + c_{01x}^2 c_{02y}^2 + 2c_{01x}^2 c_{02x}^2) \bigg) \end{array}
+\end{align*}
+and therefore reduce to degree 8 and 6, respectively.  If the LHS and RHS of (\ref{one-b}) or (\ref{two-b}) have the same sign, we square once
+more to eliminate the final square root.  Assuming positive LHS, squaring (\ref{one-b}) gives
+\begin{align*}
+(A^2 + B_1^2 C_1 - B_2^2 C_2)^2 &> 4 A^2 B_1^2 C_1 \\
+A^4 - 2A^2 B_1^2 C_1 + B_1^4 C_1^2 - 2 A^2 B_2^2 C_2 - 2 B_1^2 B_2^2 C_1 C_2 + B_2^4 C_2^2 &> 0 \\
+E &> 0 
+\end{align*}
+and squaring (\ref{two-b}) gives
+\begin{align*}
+(A^2 - B_1^2 C_1 - B_2^2 C_2)^2 &> 4 B_1^2 B_2^2 C_1 C_2 \\
+A^4 - 2A^2 B_1^2 C_1 + B_1^4 C_1^2 - 2 A^2 B_2^2 C_2 - 2 B_1^2 B_2^2 C_1 C_2 + B_2^4 C_2^2 &> 0 \\
+E &> 0.
+\end{align*}
+That is, the two inequalities square into the same degree 20 polynomial $E$, which factors into degree $\le 6$ terms as
+\begin{align*}
+E &= c_{01}^4 c_{02}^4 E_+ E_- \\
+E_\pm &= c_{02}^2 \halpha_{01}^2 + c_{01}^2 \halpha_{02}^2 - 2 \halpha_{01} \halpha_{02} (c_{01y} c_{02y} \pm c_{01x} c_{02x}) - 4 r_0^2 (c_{01x} c_{02y} \mp c_{01y} c_{02x})^2
+\end{align*}
+If intersections between four circles are compared, the analog to $E$ is still divisible by $c_{01}^4 c_{02}^4$, but the remaining degree $12$ polynomial
+is irreducible as expected from \cite{devillers2000algebraic}.
+
+As might be expected, performing these calculations only semiautomatically resulted in a large number of typos and copying errors.  The fact that the final
+result is automatically checked against interval filters in the code was critical to making the debugging process practical.
 
 \end{document}
