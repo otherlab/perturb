@@ -32,6 +32,8 @@
 \newcommand{\rand}{\operatorname{rand}}
 \newcommand{\diag}{\operatorname{diag}}
 \newcommand{\nt}{\negthinspace}
+\newcommand{\halpha}{\hat{\alpha}}
+\newcommand{\hbeta}{\hat{\beta}}
 \newcommand{\TODO}{{\color{red} TODO}}
 
 \title{Circular arc predicates}
@@ -44,65 +46,107 @@
 
 \section{Circular arc predicates}
 
-Here are most of the predicates required for circular arc Booleans:
+Here are most of the predicates required for circular arc Booleans in the plane.  $S_i = (c_i,r_i)$ be the $i$th
+circle with center $c_i$ and radius $r_i$, and $c_{ij} = c_j - c_i$.
+Note that all inequalities are strict; we do not need to worry about equalities, since by perturbation every variable is
+algebraically independent of every other.  Our predicates are as follows:
 
 \subsection{Do two circles intersect?}
 
-Let's work out all the predicates we need for circular arc booleans in the plane.  Let $S_i = (c_i,r_i)$ be the $i$th
-circle with center $c_i$ and radius $r_i$.  Circles $S_0$ and $S_1$ intersect iff
-$$ | r_1 - r_0 | < |\Delta c| < r_1 + r_0. $$
+Circles $S_0$ and $S_1$ intersect iff
+$$ | r_1 - r_0 | < |c_{01}| < r_1 + r_0. $$
 Since all quantities are positive, we can square to get
 \begin{align*}
-(r_1 - r_0)^2 < \Delta c^2 < (r_1 + r_0)^2
+(r_1 - r_0)^2 < c_{01}^2 < (r_1 + r_0)^2
 \end{align*}
-where both inequalities are degree two polynomial predicates.
+where both inequalities are degree two.
 
 \subsection{One intersection of two circles}
 
 Given circles $S_0, S_1$, define the intersection point $x_{01}$ as the intersection
-of $S_0,S_1$ to the left of line $c_0c_1$.  We have
+of $S_0,S_1$ to the left of line $c_0c_1$.  Parameterize the intersection by
 \begin{align*}
-x_{01} &= (1-\alpha) c_0 + \alpha c_1 + \beta \Delta c^\perp \\
+x_{01} &= c_0 + \alpha c_{01} + \beta c_{01}^\perp.
+\end{align*}
+We have
+\begin{align*}
 (x_{01} - c_i)^2 &= r_i^2 \\
 x_{01}^2 - 2x_{01} \cdot c_i + c_i^2 &= r_i^2.
 \end{align*}
 Subtracting the two circle equations gives
 \begin{align*}
--2x_{01} \cdot \Delta c + c_1^2 - c_0^2 &= r_1^2 - r_0^2 \\
--2c_0 \cdot \Delta c -2\alpha {\Delta c}^2 + (c_0 + c_1) \cdot \Delta c &= r_1^2 - r_0^2 \\
-(1-2\alpha) {\Delta c}^2 &= r_1^2 - r_0^2 \\
-1 - 2 \alpha &= \frac{r_1^2 - r_0^2}{\Delta c^2} \\
-\alpha &= \frac{\Delta c^2 + r_0^2 - r_1^2}{2 \Delta c^2}
+-2x_{01} \cdot c_{01} + c_1^2 - c_0^2 &= r_1^2 - r_0^2 \\
+-2c_0 \cdot c_{01} -2\alpha c_{01}^2 + (c_0 + c_1) \cdot c_{01} &= r_1^2 - r_0^2 \\
+(1-2\alpha) c_{01}^2 &= r_1^2 - r_0^2 \\
+1 - 2 \alpha &= \frac{r_1^2 - r_0^2}{c_{01}^2} \\
+\halpha = 2 c_{01}^2 \alpha &= c_{01}^2 + r_0^2 - r_1^2
 \end{align*}
 Substituting into $S_0$'s equation gives
 \begin{align*}
 (x_{01} - c_0)^2 &= r_0^2 \\
-\left(\alpha \Delta c + \beta \Delta c^\perp \right)^2 &= r_0^2 \\
-\alpha^2 \Delta c^2 + \beta^2 \Delta c^2 &= r_0^2 \\
-\beta^2 &= \frac{r_0^2}{\Delta c^2} - \alpha^2 \\
-\beta^2 &= \frac{r_0^2}{\Delta c^2} - \left(\frac{\Delta c^2 - r_1^2 + r_0^2}{2 \Delta c^2}\right)^2 \\
-4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \left( \Delta c^2 - r_1^2 + r_0^2 \right)^2
+\left(\alpha c_{01} + \beta c_{01}^\perp \right)^2 &= r_0^2 \\
+\alpha^2 c_{01}^2 + \beta^2 c_{01}^2 &= r_0^2 \\
+\beta^2 &= \frac{r_0^2}{c_{01}^2} - \alpha^2 \\
+\hbeta^2 = \left(2 c_{01}^2 \beta\right)^2 &= 4 r_0^2 c_{01}^2 - \halpha^2.
 \end{align*}
-If we define
+To summarize, the intersection between circles $S_0$ and $S_1$ is described by
 \begin{align*}
-\hat{\alpha} &= 2 \Delta c^2 \alpha \\
-\hat{\beta} &= 2 \Delta c^2 \beta
-\end{align*}
-then the intersection between circles $S_0$ and $S_1$ is described by
-\begin{align*}
-x_{01} &= c_0 + \alpha \Delta c + \beta \Delta c^\perp \\
-\hat{\alpha} = 2 \alpha \Delta c^2 &= \Delta c^2 - r_1^2 + r_0^2 \\
-\hat{\beta}^2 = 4 \beta^2 \Delta c^4 &= 4 r_0^2 \Delta c^2 - \hat{\alpha}^2
+x_{01} &= c_0 + \alpha c_{01} + \beta c_{01}^\perp \\
+\halpha = 2 \alpha c_{01}^2 &= c_{01}^2 - r_1^2 + r_0^2 \\
+\hbeta^2 = (2c_{01}^2 \beta)^2 &= 4 r_0^2 c_{01}^2 - \halpha^2
 \end{align*}
 where $^\perp$ rotates left by $90^\circ$ and we choose the positive or negative square root for $\beta$ depending on which intersection is desired.
 
 \subsection{Is one circle intersection above another?}
 
-Given three circles $S_0$ through $S_3$, is $x_{01}$ below $x_{23}$?  This predicate has the form
+Given three circles $S_0,S_1,S_2$, is $x_{01}$ below $x_{02}$?  This predicate has the form
 \begin{align*}
-c_0^y + \alpha_{01} c_{01}^y + \beta_{01} c_{01}^x &< c_2^y + \alpha_{23} c_{23}^y + \beta_{23} c_{23}^x \\
-0 &< c_{02}^y + \alpha_{23} c_{23}^y - \alpha_{01} c_{01}^y + \beta_{23} c_{23}^x - \beta_{01} c_{01}^x \\
-0 &< 2 c_{02}^y c_{01}^2 c_{23}^2 + \hat{\alpha}_{23} c_{23}^y c_{01}^2 - \hat{\alpha}_{01} c_{01}^y c_{23}^2 + \hat{\beta}_{23} c_{23}^x c_{01}^2 - \hat{\beta}_{01} c_{01}^x c_{23}^2
+c_{0y} + \alpha_{01} c_{01y} + \beta_{01} c_{01x} &< c_{0y} + \alpha_{02} c_{02y} + \beta_{02} c_{02x} \\
+0 &< \alpha_{02} c_{02y} - \alpha_{01} c_{01y} - \beta_{01} c_{01x} + \beta_{02} c_{02x} \\
+0 &< \halpha_{02} c_{02y} c_{01}^2 - \halpha_{01} c_{01y} c_{02}^2 - \hbeta_{01} c_{01x} c_{02}^2+ \hbeta_{02} c_{02x} c_{01}^2 \\
+0 &< A + B_1 \sqrt{C_1} + B_2 \sqrt{C_2}
+\end{align*}
+where $A,B_1,B_2,C_1,C_2$ are polynomials and $C_1, C_2 > 0$ since the two intersections are assumed to exist.  To reduce this equality to
+purely polynomial equalities, we first compute the signs of $A, B_1, B_2$.  If these all match, we are done.  Otherwise we move the square root
+terms that differ from $A$ in sign to the RHS and square.  Assuming $A > 0$, this gives either
+\begin{align}
+A + B_1 \sqrt{C_1} &> -B_2 \sqrt{C_2} \nonumber \\
+A^2 + B_1^2 C_1 + 2 A B_1 \sqrt{C_1} &> B_2^2 C_2 \nonumber \\
+A^2 + B_1^2 C_1 - B_2^2 C_2 &> -2 A B_1 \sqrt{C_1} \label{one-b}
+\end{align}
+or
+\begin{align}
+A &> -B_1 \sqrt{C_1} - B_2 \sqrt{C_2} \nonumber \\
+A^2 &> B_1^2 C_1 + B_2^2 C_2 + 2 B_1 B_2 \sqrt{C_1 C_2} \nonumber \\
+A^2 - B_1^2 C_1 - B_2^2 C_2 &> 2 B_1 B_2 \sqrt{C_1 C_2} \label{two-b}
+\end{align}
+The signs of the RHS's of (\ref{one-b}) and (\ref{two-b}) are known.  The polynomial LHS's are degree 10, but factor as
+\begin{align*}
+\begin{array}{@{}r} A^2 + B_1^2 C_1 - B_2^2 C_2 \phantom{\bigg(} \hspace{-.3em}= \\ \phantom{\bigg(} \end{array}&%
+\begin{array}{@{}r@{}l@{}} c_{02}^2 \bigg(& c_{01}^2 \left(\halpha_{02} \left(\halpha_{02} c_{01}^2 - 2 \halpha_{01} c_{01y} c_{02y}\right)
+  + 4 r_0^2 (c_{01x}^2 c_{02y}^2 - c_{01y}^2 c_{02x}^2)\right) \\
+  &- \halpha_{01}^2 \left(c_{01x}^2 - c_{01y}^2\right) c_{02}^2 \bigg) \end{array} \\
+\begin{array}{@{}r} A^2 - B_1^2 C_1 - B_2^2 C_2 \phantom{\bigg(} \hspace{-.3em}= \\ \phantom{\bigg(} \end{array}&%
+\begin{array}{@{}r@{}l@{}} c_{01}^2 c_{02}^2 \bigg(& c_{02}^2 \halpha_{01}^2 + c_{01}^2 \halpha_{02}^2 - 2 c_{01y} c_{02y} \halpha_{01} \halpha_{02} \\
+  &- 4 r_0^2 (c_{01y}^2 c_{02x}^2 + c_{01x}^2 c_{02y}^2 + 2c_{01x}^2 c_{02x}^2) \bigg) \end{array}
+\end{align*}
+and therefore reduce to degree 8 and 6, respectively.  If the LHS and RHS of (\ref{one-b}) or (\ref{two-b}) have the same sign, we square once
+more to eliminate the final square root.  Assuming positive LHS, squaring (\ref{one-b}) gives
+\begin{align*}
+(A^2 + B_1^2 C_1 - B_2^2 C_2)^2 &> 4 A^2 B_1^2 C_1 \\
+A^4 - 2A^2 B_1^2 C_1 + B_1^4 C_1^2 - 2 A^2 B_2^2 C_2 - 2 B_1^2 B_2^2 C_1 C_2 + B_2^4 C_2^2 &> 0 \\
+E &> 0 
+\end{align*}
+and squaring (\ref{two-b}) gives
+\begin{align*}
+(A^2 - B_1^2 C_1 - B_2^2 C_2)^2 &> 4 B_1^2 B_2^2 C_1 C_2 \\
+A^4 - 2A^2 B_1^2 C_1 + B_1^4 C_1^2 - 2 A^2 B_2^2 C_2 - 2 B_1^2 B_2^2 C_1 C_2 + B_2^4 C_2^2 &> 0 \\
+E &> 0.
+\end{align*}
+That is, the two inequalities square into the same degree 20 polynomial $E$, which factors into degree $\le 6$ terms as
+\begin{align*}
+E &= c_{01}^4 c_{02}^4 E_+ E_- \\
+E_\pm &= c_{02}^2 \halpha_{01}^2 + c_{01}^2 \halpha_{02}^2 - 2 \halpha_{01} \halpha_{02} (c_{01y} c_{02y} \pm c_{01x} c_{02x}) - 4 r_0^2 (c_{01x} c_{02y} \mp c_{01y} c_{02x})^2
 \end{align*}
 
 \subsection{Is the angle at an intersection counterclockwise?}
@@ -113,9 +157,9 @@ t_0 \times t_1 &> 0 \\
 (x_{01} - c_0)^\perp \times (x_{01} - c_1)^\perp &> 0 \\
 (x_{01} - c_0) \times (x_{01} - c_1) &> 0 \\
 (x_{01} - c_0) \times (c_0 - c_1) &> 0 \\
-(\alpha \Delta c + \beta \Delta c^\perp) \times \Delta c &< 0 \\
-\beta \Delta c^2 &> 0 \\
-\hat{\beta} &> 0
+(\alpha c_{01} + \beta c_{01}^\perp) \times c_{01} &< 0 \\
+\beta c_{01}^2 &> 0 \\
+\hbeta &> 0
 \end{align*}
 
 Thus the angle is $> 180^\circ$ for the intersection to the left of segment $(c_0,c_1)$, $< 180^\circ$ for the intersection to the right.
@@ -125,7 +169,7 @@ Thus the angle is $> 180^\circ$ for the intersection to the left of segment $(c_
 Consider two circles $S_0, S_1$ together with a horizontal line at coordinate $y$.  $x_{01}$ is below $y$ iff
 \begin{align*}
 y &> c_0^y + \alpha c_{01}^y + \beta c_{01}^x \\
-2 (y-c_0^y) c_{01}^2 - \hat{\alpha} c_{01}^y - \hat{\beta} c_{01}^x &> 0
+2 (y-c_0^y) c_{01}^2 - \halpha c_{01}^y - \hbeta c_{01}^x &> 0
 \end{align*}
 
 \subsection{Does one circle-horizontal intersection occur to the left of another?}
