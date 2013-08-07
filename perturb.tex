@@ -35,7 +35,6 @@
 \newcommand{\diag}{\operatorname{diag}}
 \newcommand{\nt}{\negthinspace}
 \newcommand{\TODO}{{\color{red} TODO}}
-
 \newcommand{\MW}[1]{\textcolor{blue}{\bf[MW: #1]}}
 
 \title{A deterministic pseudorandom perturbation scheme for arbitrary polynomial predicates}
@@ -137,9 +136,10 @@ f_3 &= f(x + \epsilon_1 y_1 + \epsilon_2 y_2 + \epsilon_3 y_3) \\
 \vdots
 \end{align*}
 and stopping as soon as we arrive at a nonzero polynomial $f_k(\epsilon_1. \ldots, \epsilon_k)$.
-To compute each $f_k$, we use a black box function for $f(x)$ to evaluate $f_k(\epsilon_1, \ldots, \epsilon_k)$ for the $\binom{k+d}{k}$ nonnegative tuples $(\epsilon_1, \ldots, \epsilon_k)$
-s.t.\ $\epsilon_1 + \cdots + \epsilon_k \le d$, \MW{Somewhere, $\epsilon_{i}$ turned into a integers.} as discussed in \cite{neidinger2009multivariable} and \autoref{polynomial}.  If any values are nonzero, we use multivariate
-polynomial interpolation to recover the $\binom{k+d}{k}$ coefficients of $f_k$, and return the sign of the least infinitesimal nonzero term.
+To compute the coefficients of a given $f_k$, we temporarily view the infinitesimals $\epsilon_i$ as integer variables and use a black box function for $f(x)$ to evaluate
+$f_k(\epsilon_1, \ldots, \epsilon_k)$ with $(\epsilon_1, \ldots, \epsilon_k)$ replaced with all $\binom{k+d}{k}$ nonnegative integer tuples satisfying $\epsilon_1 + \cdots + \epsilon_k \le d$
+as discussed in \cite{neidinger2009multivariable} and \autoref{polynomial}.
+If any values are nonzero, we use multivariate polynomial interpolation to recover the $\binom{k+d}{k}$ coefficients of $f_k$, and return the sign of the least infinitesimal nonzero term.
 
 We show that the computational cost is dominated by the first perturbation term even for arbitrarily degenerate input, as long as the range $Y$ of the random generator
 satisfies $d^3 \ll |Y|$.  In other words, our scheme has the same cost as the simple linear scheme.  To see this, note that $f_k$ can be zero only if $f(x + y_1), \ldots, f(x + y_k)$ are zero,
@@ -155,7 +155,7 @@ interpolation at level $k$ is $O\left(d \binom{d + k}{k}^2\right)$ (see \autoref
 where we need $d^3 < |Y|$ to guarantee a convergent geometric series.  In practice, $d^3 \ll |Y|$; for $|Y| = 2^{32}$ terms with $k \ge 2$ contribute less than $1/4000$th of the expected cost
 for polynomials up to degree $100$.  We emphasize that this bound is independent of the input $x$, and therefore holds even for maliciously chosen input data.  However, we do
 assume that $\rand$ behaves as a strong random source, and in particular that the polynomials $f(x)$ are not chosen with knowledge of $\rand$.\footnote{Though maliciously
-choosing $f(x)$ so that $f_1 = f_2 = 0$ is quite useful for unit testing purposes.}\MW{Isn't that what maliciously choosing $f(x)$ means? Not that it matters in practice, you could easily seed $\rand$.}
+choosing $f(x)$ so that $f_1 = f_2 = 0$ is quite useful for unit testing purposes.}
 
 Thus, our method has the same complexity as the deterministic linear scheme, but like Yap's scheme and the randomized linear scheme it works on arbitrary polynomials.  As in the
 randomized scheme, the perturbation does not create any worst case behavior not already present in the input data.  Since the occasional random fallbacks occur one
@@ -200,11 +200,12 @@ predicate, which complicates the design of algorithms and is a likely source of 
 algorithm, chaining two algorithms together requires adjusting the perturbations to be compatible.  Their approach shares with ours (and indeed
 with Yap's) the idea of a sequence of increasingly small perturbations, applied one at a time until a nonsingular result is obtained.
 
-Finally, we address a common complaint against symbolic perturbation, namely that a complicated postprocessing step is required to obtain the ``exact'' answer from the
-perturbed result.  We believe that in the vast majority of applications which might benefit from a more exact answer, what it is actually desired is something much
-stronger: a finitely nondegenerate geometric structure with no small triangles, sharp angles, etc.\  In practice, an exactly computed geometric result may need to
-be followed by mesh simplification, smoothing, etc.\ (possibly followed by further exact algorithms), and this extra work is the same whether or not exact degeneracies are
-treated specially. \MW{This is a very specific example. What is the broader point here? Maybe it is that if people claim they need the exact answer, this is meaningless if the input is degenerate. Or, maybe it is that people claiming they need the exact answer really don't (this is close to the point you're making for meshes). Or maybe it is that if the perturbations influence ``global'' features such as topology, then those better should be unimportant, because they are pretty much undefined, and no amount of postprocessing will recover the ``true'' exact result.}
+Finally, we address a common complaint against symbolic perturbation (e.g., \cite{burnikel1994degeneracy}), namely that a complicated postprocessing step is required to obtain the
+exact answer from the perturbed result.  We argue that the input to a typical geometric algorithm already contains some degree of noise or numerical inaccuracy, and therefore that
+classes of errors arising from infinitesimal symbolic perturbation already arise in practice for exact algorithms run on slightly bad input data.  For example, consider the Boolean
+union of two squares which touch exactly along one edge.  An exact algorithm run on this ideal input would merge the two squares into one rectangle, while symbolic perturbation may
+leave the squares separate or even join them only partway along the edge.  However, if the input is already slightly shifted, both algorithms produce exactly the same result.
+The solution in both cases is to offset the squares slightly outwards prior to union, which resolves both infinitesimal and finite errors.
 
 \section{Implementation}
 
@@ -228,15 +229,16 @@ larger than $g_k$, but it is easy to detect this case and throw an exception as 
 rule for computing limits.  Finally, the ratio is rounded to the nearest integer.  We can similarly compute $\sqrt{f(x)/g(x)}$ by evaluating the limit of the ratio as a rational and
 taking an exactly rounded square root.
 
-We emphasize that these perturbed constructions are (except for the final rounding) geometrically consistent with the rest of the algorithm, and in particular obey any geometric
-invariants that apply in the exact case (again, except for the rounding).  For example, the union of a convex polygon with itself will remain nearly convex, and in particular will
-avoid (all but extremely tiny \MW{how tiny? Why? How much is this worth if it's not a guarantee?}) foldovers that might result from performing constructions with floating point arithmetic when an algorithm completes.  Moreover, since they
-are guaranteed to be within distance $1/2$ of the true answer, they can be fed back into the same algorithm as tight interval bounds without fear of introducing inconsistencies.  Our
+We emphasize that these perturbed constructions are guaranteed to be within distance $1/2$ of the true answer, where the true answer is consistent with the rest of the algorithm and
+obeys any geometric invariants that apply in the exact case.  For example, a constructed union of a convex polygon with itself will be within distance $1/2$ of the input, and in
+particular will avoid all but extremely tiny foldovers that might result from performing constructions with floating point arithmetic when an algorithm completes.
+Moreover, since the maximum error is known, they can be fed back into the same algorithm as tight interval bounds without fear of introducing inconsistencies.  Our
 circular arc Boolean code makes use of this to perform more accurate interval-based filtering.  For example, when comparing $y$ coordinates of different intersections of circles,
 we precompute the rounded intersections and avoid costly polynomial evaluation if the rounded coordinates differ.
 
 Debugging and testing the symbolically perturbed algorithms we have implemented so far has been a quite pleasant experience.  Once the perturbation core itself is trusted,
-bugs in the surrounding algorithm necessarily manifest on a set of positive measure \MW{why is this necessary?}, and therefore are likely to be found by running the algorithm on random input.  In contrast, an
+bugs in the surrounding algorithm necessarily manifest on a set of positive measure, since any taken branching path through the code is described by algebraic inequalities which
+give rise to open sets.  Thus, all bugs are likely to be found by running the algorithm on random input.  In contrast, an
 algorithm which handles degeneracies specially or tailors the perturbation to the predicates involved must actually test each kind of degeneracy when debugging the algorithm.
 Any speedup logic such as interval filtering can be easily checked by including a compile time flag to unconditionally evaluate both fast and slow paths.  This tests both the
 correctness of the filter and the correctness of the predicate, which is important for complicated polynomial predicates.
