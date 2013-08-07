@@ -178,7 +178,7 @@ However, the algorithm specific approaches may be superior to a general approach
 entirely, by treating degenerate cases faster (our approach introduces a slowdown of $O(d)$ for the first perturbation level over exact evaluation), or by computing the true exact
 answer rather than a perturbed answer.
 
-Perhaps the most natural approach to treating to degeneracies is to manually extend the definition of $G(x)$ to degenerate cases, and write algorithms which treat these cases
+Perhaps the most natural approach to treating degeneracies is to manually extend the definition of $G(x)$ to degenerate cases, and write algorithms which treat these cases
 directly.  For example, in an arrangement of lines, intersections of three or more lines can be detected and represented as higher degree vertices in the arrangement graph.
 \cite{burnikel1994degeneracy} argues that perturbation is slower and more complicated to implement than simply handling degeneracies directly, and presents two degeneracy-aware
 algorithms as evidence.  We believe our method reduces the implementation complexity of symbolic perturbation, but agree that a tailored algorithm is faster on highly
