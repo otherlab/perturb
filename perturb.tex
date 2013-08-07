@@ -51,12 +51,12 @@
 We present a symbolic perturbation scheme for arbitrary polynomial geometric predicates which combines the benefits of
 Emiris and Canny's simple randomized linear perturbation scheme with Yap's multiple infinitesimal scheme for general predicates.
 Like the randomized scheme, our method accepts black box polynomial functions as input.  For nonmaliciously chosen predicates,
-our method is as fast as the linear scheme, and in particular scales reasonably with the degree of the polynomial even for fully
+our method is as fast as the linear scheme, scaling reasonably with the degree of the polynomial even for fully
 degenerate input.  Like Yap's scheme, the computed sign is deterministic, never requiring an algorithmic restart (assuming a
 high quality pseudorandom generator), and works for arbitrary predicates with no knowledge of their structure.  We also apply
 our technique to exactly or nearly exactly rounded constructions that work correctly for degenerate input, using l'H\^opital's
 rule to compute the necessary singular limits.  Our prototype implementation is available as open source, together with example
-algorithms for Delaunay triangulation and Boolean operations on polygons and circular arc polygons in the plane.
+algorithms for Delaunay triangulation and Boolean operations on polygons and circular arcs in the plane.
 \end{abstract}
 
 \section{Introduction}
@@ -98,7 +98,7 @@ Emiris and Canny's deterministic linear scheme \cite{emiris1992efficient} groups
 $k$ of the geometric space as $x_{i,j}$, $1 \le i \le n$, $1 \le j \le k$, introduces a single infinitesimal $\epsilon$, and writes
 $$\delta_{i,j} = \epsilon (i^j \operatorname{mod} p)$$
 where $p > n$ is a prime.  They show that this scheme produces a nonzero sign for simplex orientation tests up to dimension $k$ and for
-the incircle tests used in Delaunay triangulation.  However, as discussed in \cite{seidel1998nature}, extending this technique to more complicated predicates
+the incircle tests used in Delaunay triangulation.  However, as discussed in \cite{seidel1998nature}, extending this technique to other predicates
 is difficult.
 
 Emiris and Canny's randomized linear scheme \cite{emiris1995general} again introduces a single infinitesimal $\epsilon$, but now sets
@@ -115,7 +115,7 @@ points are at the origin.  We believe this also applies to Yap's scheme, and may
 
 To summarize: Yap's deterministic scheme and the randomized linear scheme work for arbitrary polynomial predicates, but suffer from unfortunate performance penalties.
 The randomized linear scheme occasionally requires a restart of all or part of the computation, adding extra complexity to the surrounding algorithm
-especially if multiple computations are chained together (possibly with user interaction in between!).  The deterministic linear scheme is ideal when it works,
+especially if multiple computations are chained together (possibly with user interaction in between).  The deterministic linear scheme is ideal when it works,
 but requires special analysis to verify correctness for each predicate.
 
 Our contribution is to combine the advantages of each of the above methods.
@@ -150,10 +150,10 @@ $$\Pr(f_k = 0) \le \frac{d^k}{|Y|^k}.$$
 The sizes of the lattice points on which we evaluate $f$ grow slowly with $k$, so the cost of a single polynomial evaluation is effectively $O(1)$ where the constant depends on the
 polynomial.  Similarly, the sizes of the numbers used for multivariate interpolation also grow slowly with $k$, so the cost of multivariate
 interpolation at level $k$ is $O\left(d \binom{d + k}{k}^2\right)$ (see \autoref{polynomial}).  Thus, the expected cost of the perturbation scheme is
-\begin{align} \label{cost}
+\begin{align*}
 \sum_{k = 0}^\infty \Pr(f_k = 0) O\hspace{-.25em}\left(d \binom{d + k + 1}{k + 1}^2\right) \le \sum_{k = 0}^\infty \frac{d^k}{|Y|^k} O(d^{2k+3})
   = O\hspace{-.25em}\left(d^3 \sum_{k = 0}^\infty \frac{d^{3k}}{|Y|^k} \right) = O(d^3)
-\end{align}
+\end{align*}
 where we need $d^3 < |Y|$ to guarantee a convergent geometric series.  In practice, $d^3 \ll |Y|$; for $|Y| = 2^{32}$ terms with $k \ge 2$ contribute less than $1/4000$th of the expected cost
 for polynomials up to degree $100$.  We emphasize that this bound is independent of the input $x$, and therefore holds even for maliciously chosen input data.  However, we do
 assume that $\rand$ behaves as a strong random source, and in particular that the polynomials $f(x)$ are not chosen with knowledge of $\rand$.\footnote{Though maliciously
@@ -211,11 +211,11 @@ The solution in both cases is to offset the squares slightly outwards prior to u
 
 \section{Implementation}
 
-A C++ implementation of our symbolic perturbation technique is available under a BSD license at \url{https://github.com/otherlab/core/tree/exact} (see 
-\url{https://github.com/otherlab/core/commit/dc0f10918d17507d} for the version at the time of this writing).  The code includes three algorithms built on top of the perturbation
+A C++ implementation of our symbolic perturbation technique is available under a BSD license at \url{https://github.com/otherlab/core/tree/exact}\footnote{See 
+\url{https://github.com/otherlab/core/commit/dc0f10918d17507d} for the version benchmarked below.}.  The code includes three algorithms built on top of the perturbation
 core: Delauany triangulation, Boolean operations on polygons, and Boolean operations on polygons built from circular arcs.  We plan to expand the set of implemented algorithms
-and use them for various tasks in CAD/CAM such as shape decomposition for manufacturing and motion planning.  Benchmarks and plotting scripts used for the
-paper are available along with the paper source at \url{https://github.com/otherlab/perturb}.
+and use them for various tasks in CAD/CAM such as shape decomposition for manufacturing and motion planning.  Benchmarks and plotting scripts are available along with the
+paper source at \url{https://github.com/otherlab/perturb}.
 
 For simplicity and speed, our implementation quantizes all input coordinates to the integer range $[-2^{53},2^{53}]$, the largest range of integers exactly representable in
 double precision.  This allows use of fast interval arithmetic filters \cite{bronnimann2001interval}, falling back to exact integer evaluation using GMP if the filter fails \cite{granlund2012gmp},
@@ -243,14 +243,13 @@ bugs in the surrounding algorithm necessarily manifest on a set of positive meas
 give rise to open sets.  Thus, all bugs are likely to be found by running the algorithm on random input.  In contrast, an
 algorithm which handles degeneracies specially or tailors the perturbation to the predicates involved must actually test each kind of degeneracy when debugging the algorithm.
 Any speedup logic such as interval filtering can be easily checked by including a compile time flag to unconditionally evaluate both fast and slow paths.  This tests both the
-correctness of the filter and the correctness of the predicate, which is important for complicated polynomial predicates.
+correctness of the filter and the correctness of the predicate, which is important for complicated predicates.
 
 Although our currently implemented algorithms are serial, our symbolic perturbation scheme can easily be used in parallel algorithms since each predicate evaluation is deterministic.
-However, the dramatic slowdown between interval filtering and perturbed exact evaluation might interfere with load balancing at very high levels of parallelism, in particular for
-GPU computations.
+However, the dramatic slowdown between interval filtering and perturbed exact evaluation might interfere with load balancing at very high levels of parallelism, such as on a GPU.
 
 In a correct geometric algorithm, no polynomial passed to symbolic perturbation will be identical zero; this would correspond to a fundamentally degenerate question such as
-``Is the triangle $(x_7,x_7,x_7)$ counterclockwise?''.  However, it is extremely convenient for debugging to detect these cases and produce useful output.  Therefore,
+``Is the triangle $(x_7,x_7,x_7)$ counterclockwise?''.  However, it is convenient for debugging to detect these cases and produce useful output.  Therefore,
 if both $f_1$ and $f_2$ are identically zero, our code pauses to run a randomized polynomial identity check \cite{schwartz1980fast} and throws an exception if a nonzero is not found.
 The identity test evaluates the polynomial on 20 random points; this produces a false positive with probability under $10^{-171}$ (sufficient for the
 lifetime of the code), and always reports failure for a truly zero polynomial.  The check has negligable effect on overall cost, since usually $f_1 \ne 0$.
