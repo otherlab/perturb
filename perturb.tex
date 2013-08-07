@@ -92,7 +92,7 @@ corresponds to evaluating $f(x_1+\epsilon_1, x_2+\epsilon_2, \ldots)$.  Since ea
 one nonzero monomial unless $f$ is identically zero, so the scheme produces a nonzero sign for all nonzero polynomials.  Unfortunately, a degree $d$ polynomial
 $f$ results in an $f(x+\delta) \in \R[\epsilon_1,\epsilon_2, \ldots]$ with up to $\binom{n + d}{n}$ monomial terms where $n$ is the number of input
 coordinates used by $f$, which is worst case exponential in the degree in the predicate.  For extremely degenerate input, we may need to evaluate a large
-number of coefficents before finding a nonzero.
+number of coefficients before finding a nonzero.
 
 Emiris and Canny's deterministic linear scheme \cite{emiris1992efficient} groups the input coordinates into $n$ $k$-vectors based on the dimension
 $k$ of the geometric space as $x_{i,j}$, $1 \le i \le n$, $1 \le j \le k$, introduces a single infinitesimal $\epsilon$, and writes
@@ -165,7 +165,7 @@ polynomial at a time, the outer structure of a geometric algorithm is blissfully
 scaling when evaluating many predicates over the course of an algorithm.
 
 In practice, the dominant cost of the algorithm is black box predicate evaluation.  Even a single multiplication of two degree $d/2$ terms has complexity $O(d^2)$ using naive
-quadratic multiplication (which is typically the fastest algorithm for small degrees).  The linear perturbation phase peforms $d$ polynomial evaluations, for a total
+quadratic multiplication (which is typically the fastest algorithm for small degrees).  The linear perturbation phase performs $d$ polynomial evaluations, for a total
 complexity of $O(d^3)$, and the constant is typically higher than for interpolation since most polynomials involve several such multiplications.  An $O(d^3)$ slowdown for degenerate
 cases is faster than previous general approaches but still a significant drawback (see \autoref{sec:results} for benchmarks).  Fortunately, a tiny amount of finite perturbation
 applied to the input can minimize both the $O(d^3)$ slowdown of perturbation and the $O(d^2)$ slowdown of unperturbed exact evaluation, relying on symbolic perturbation to
@@ -198,7 +198,7 @@ no algorithm specific analysis.
 Devillers et al.\ \cite{devillers2012qualitative} present \emph{qualitative symbolic perturbation}, which replaces the algebraic perturbations used in previous perturbation schemes (and ours)
 by a sequence of carefully chosen, geometrically meaningful perturbations.  Their approach replaces the $O(d)$ slowdown of the first perturbation level with a predicate dependent
 slowdown, and may be faster than our method when it applies.  However, the geometric perturbations and the analysis of their effect on the predicates must be performed separately for each
-predicate, which complicates the design of algorithms and is a likely source of complexity during implementation and debuggging.  Moreover, since the perturbations depend on the
+predicate, which complicates the design of algorithms and is a likely source of complexity during implementation and debugging.  Moreover, since the perturbations depend on the
 algorithm, chaining two algorithms together requires adjusting the perturbations to be compatible.  Their approach shares with ours (and indeed
 with Yap's) the idea of a sequence of increasingly small perturbations, applied one at a time until a nonsingular result is obtained.
 
@@ -213,7 +213,7 @@ The solution in both cases is to offset the squares slightly outwards prior to u
 
 A C++ implementation of our symbolic perturbation technique is available under a BSD license at \url{https://github.com/otherlab/core/tree/exact}\footnote{See 
 \url{https://github.com/otherlab/core/commit/dc0f10918d17507d} for the version benchmarked below.}.  The code includes three algorithms built on top of the perturbation
-core: Delauany triangulation, Boolean operations on polygons, and Boolean operations on polygons built from circular arcs.  We plan to expand the set of implemented algorithms
+core: Delaunay triangulation, Boolean operations on polygons, and Boolean operations on polygons built from circular arcs.  We plan to expand the set of implemented algorithms
 and use them for various tasks in CAD/CAM such as shape decomposition for manufacturing and motion planning.  Benchmarks and plotting scripts are available along with the
 paper source at \url{https://github.com/otherlab/perturb}.
 
@@ -252,7 +252,7 @@ In a correct geometric algorithm, no polynomial passed to symbolic perturbation 
 ``Is the triangle $(x_7,x_7,x_7)$ counterclockwise?''.  However, it is convenient for debugging to detect these cases and produce useful output.  Therefore,
 if both $f_1$ and $f_2$ are identically zero, our code pauses to run a randomized polynomial identity check \cite{schwartz1980fast} and throws an exception if a nonzero is not found.
 The identity test evaluates the polynomial on 20 random points; this produces a false positive with probability under $10^{-171}$ (sufficient for the
-lifetime of the code), and always reports failure for a truly zero polynomial.  The check has negligable effect on overall cost, since usually $f_1 \ne 0$.
+lifetime of the code), and always reports failure for a truly zero polynomial.  The check has negligible effect on overall cost, since usually $f_1 \ne 0$.
 
 Our geometric algorithms themselves are unremarkable: we use \cite{amenta2003incremental} for Delaunay triangulation and compute Boolean operations using axis-aligned bounding
 box hierarchies to find intersections and rays traced along horizontal lines to find winding numbers for each contour (horizontal lines are safe due to symbolic perturbation).  Our Delaunay
@@ -368,12 +368,12 @@ monomial basis transformation matrix factors into commuting matrices each expand
 
 \section{Degree 8 circular arc predicates} \label{sec:predicates}
 
-The critical predicate required for circular arc arrangments, determining whether one intersection of two arcs is above another intersection,
+The critical predicate required for circular arc arrangements, determining whether one intersection of two arcs is above another intersection,
 can be reduced to degree 12 using resultant techniques \cite{devillers2000algebraic}.  This holds for the general case of two unrelated intersections between pairs of circles
 $C_0,C_1$ and $C_2,C_3$.  However, to compute a circular arc arrangement it suffices to consider the case where $C_0 = C_2$; that is, comparing the $y$ coordinates of the
 intersections of one circle with two others.  In this case, the polynomials can be factored into terms of degree $\le 8$.  One significant algorithmic change is required,
 since we can no longer fire a horizontal or vertical ray from the intersection of $C_0,C_1$ and detect intersections against unrelated circle arcs.  Instead, we must fire
-rays along exactly known (degree 1) $y$ coordinates, which is sufficient to determine the winding number of a given circular arc polyon (or connected component of an arrangement)
+rays along exactly known (degree 1) $y$ coordinates, which is sufficient to determine the winding number of a given circular arc polygon (or connected component of an arrangement)
 as long as the bounding box touches at least one ray.  For most applications, polygons smaller than this may be safely discarded.
 
 We derived the degree 8 version of the predicate by starting with an inequality involving square roots, then iteratively checking polynomial signs and squaring to eliminate
