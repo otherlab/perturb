@@ -5,12 +5,13 @@
 *.blg
 *.pyc
 *.cpt
+*.out
 .sconsign.dblite
 .DS_Store
-circles.out
-perturb.out
 circles.pdf
 perturb.pdf
+perturb-jocg.pdf
+jocg-sample.*
 helper/config.py
 helper/SConstruct
 helper/setup.cfg
