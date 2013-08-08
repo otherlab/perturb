@@ -74,7 +74,7 @@ our method is as fast as the linear scheme, scaling reasonably with the degree o
 degenerate input.  Like Yap's scheme, the computed sign is deterministic, never requiring an algorithmic restart (assuming a
 high quality pseudorandom generator), and works for arbitrary predicates with no knowledge of their structure.  We also apply
 our technique to exactly or nearly exactly rounded constructions that work correctly for degenerate input, using l'H\^opital's
-rule to compute the necessary singular limits.  Our prototype implementation is available as open source, together with example
+rule to compute the necessary singular limits.  We provide an open source prototype implementation including example
 algorithms for Delaunay triangulation and Boolean operations on polygons and circular arcs in the plane.
 \end{abstract}
 
@@ -288,13 +288,13 @@ if both $f_1$ and $f_2$ are identically zero, our code pauses to run a randomize
 The identity test evaluates the polynomial on 20 random points; this produces a false positive with probability under $10^{-171}$ (sufficient for the
 lifetime of the code), and always reports failure for a truly zero polynomial.  The check has negligible effect on overall cost, since usually $f_1 \ne 0$.
 
-Our geometric algorithms themselves are unremarkable: we use \cite{amenta2003incremental} for Delaunay triangulation and compute Boolean operations using axis-aligned bounding
-box hierarchies to find intersections and rays traced along horizontal lines to find winding numbers for each contour (horizontal lines are safe due to symbolic perturbation).  Our Delaunay
-triangulation algorithm is $O(n \log n)$ for arbitrarily degenerate input, and happily computes a random but valid Delaunay triangulation if all points are at the origin.  Our current Boolean
+For Delaunay triangulation, we use the partially randomized incremental construction of \cite{amenta2003incremental}.  Our implementation is $O(n \log n)$ for arbitrarily degenerate input,
+and happily computes a random but valid Delaunay triangulation if all points are at the origin.  For Boolean operations, we find intersections using axis-aligned bounding box hierarchies
+and find winding numbers for each contour by tracing rays along horizontal lines (horizontal lines are safe due to symbolic perturbation).  Our current Boolean
 operation algorithms degrade to $O(n^2 \log n)$ for fully degenerate input since they compute an arrangement of curves as the first step; this slowdown is independent of the perturbation
 technique used, and also occurs for badly formed nondegenerate input.  Compared to \cite{devillers2000algebraic}, which used degree 12 predicates for circular arc arrangements,
-our implementation uses predicates of degree at most 8 using a combination of polynomial factoring and algorithmic changes (see \autoref{sec:predicates}).  Even degree 8 is problematic
-for Yap's scheme due to the worst case exponential blowup in the number of terms.  We note similar work in CGAL on circle arrangements in \cite{wein2006circles}; this is orthogonal to our contribution.
+our implementation uses predicates of degree at most 8 via a combination of polynomial factoring and algorithmic changes (see \autoref{sec:predicates}).  Even degree 8 is problematic
+for Yap's scheme due to the worst case exponential blowup in the number of terms.  Other work on circle arrangements in CGAL was done by \cite{wein2006circles}; this is orthogonal to our contribution.
 
 \section{Results} \label{sec:results}
 
@@ -313,7 +313,7 @@ arithmetic filters to integer computation and symbolic perturbation.  To reprodu
 \label{fig:delaunay}
 \end{figure}
 
-Results for Delaunay triangulation are shown in \autoref{fig:delaunay}.  Since our algorithm is worst case $O(n \log n)$ independent of degeneracies, the slowdown from random
+Results for Delaunay triangulation are shown in \autoref{fig:delaunay}.  Since our algorithm is worst case $O(n \log n)$ independent of degeneracies, the slowdown ratio from random
 input to fully degenerate input (all points at the origin) is constant: between $13$ and $15.5$ due to falling back from interval arithmetic filters to exact integer computation
 and symbolic perturbation.  We note that our current Delaunay triangulation algorithm is not state of the
 art, though this is orthogonal to our contributions: CGAL's routine is 4.3 times faster on $10^6$ normally distributed points ($0.704$ s vs. $3.05$ s).  It is also dramatically
@@ -377,7 +377,7 @@ This factorization was given in \cite{oruc2000explicit}, though in a somewhat le
 The clean $LU$ factorization was given in \cite{olver2006multivariate}, though without the further bidiagonal factorization.
 
 The first half of this factorization is the classical divided difference algorithm to convert values $f(x_0), \ldots, f(x_k)$ into the coefficients of $f$ in the Newton
-basis.  The second half expands from the Newton basis down to monomials.  In our case, we have $x_k = k$, so all of the ratios in each bidiagonal matrix have the same denominator.
+basis $x(x-1)\cdots(x-n+1)$.  The second half expands from the Newton basis down to monomials.  In our case, we have $x_k = k$, so all of the ratios in each bidiagonal matrix have the same denominator.
 In particular, we can clear fractions by multiplying the inverse by $d!$ where $d$ is the degree of $f$, after which all computations can be performed in integers.  Alternatively,
 we can use the fact that while the inverse of the Vandermonde matrix is not integral, both our polynomial values and the coefficients of the polynomials in both Newton and monomial basis
 are integers.  It turns out that in this case all intermediate results in the divided difference algorithm are integers as well.  To show this, we must prove that the $k$th forward
