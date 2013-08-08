@@ -105,7 +105,7 @@ G'(x) = G(x+\delta).
 In detail, whenever the algorithm asks for the sign of $f(x)$ for some integer coefficient polynomial $f$, we instead compute
 $f(x+\delta)$, which is a multivariate polynomial in the infinitesimals.  The sign of $f(x+\delta)$ is the sign of the ``least infinitesimal''
 nonzero monomial coefficient of this polynomial.
-We distinguish between three existing symbolic perturbation schemes that can be expressed in this framework, and discuss their advantages
+We distinguish between three existing symbolic perturbation schemes that can be expressed in this framework and discuss their advantages
 and disadvantages.
 
 {\bf Yap's deterministic scheme} \cite{yap1990symbolic} introduces one infinitesimal $\epsilon_i$ per input coordinate $x_i$, and lets $\delta_i = \epsilon_i$.  This
@@ -126,7 +126,7 @@ is difficult.
 
 In addition, as noted in \cite{burnikel1994degeneracy}, a fixed deterministic perturbation may turn highly degenerate input into worst case behavior for algorithms
 like convex hull: ignoring the $\operatorname{mod} p$, the deterministic linear scheme produces a convex hull of size $n^{\lceil d/2 \rceil}$ when all input
-points are at the origin.  We believe this also applies to Yap's scheme, and may arise with the modular deterministic linear scheme.
+points are at the origin.  We believe this also applies to Yap's scheme and may arise with the modular deterministic linear scheme.
 
 {\bf Emiris and Canny's randomized linear scheme} \cite{emiris1995general} again introduces a single infinitesimal $\epsilon$, but now sets
 $\delta_i = \epsilon y_i$ using random coefficients $y_i$ chosen from some space $Y$.  By the Schwartz-Zippel lemma \cite{schwartz1980fast}, $f(x+\delta)$
@@ -138,7 +138,7 @@ it is possible to reduce this slowdown by restarting only part of the algorithm,
 
 To summarize: Yap's deterministic scheme and the randomized linear scheme work for arbitrary polynomial predicates, but suffer from unfortunate performance penalties.
 The randomized linear scheme occasionally requires a restart of all or part of the computation, adding extra complexity to the surrounding algorithm
-especially if multiple computations are chained together (possibly with user interaction in between).  The deterministic linear scheme is ideal when it works,
+especially if multiple computations are chained together (possibly with user interaction in between).  The deterministic linear scheme is ideal when it works
 but requires special analysis to verify correctness for each predicate.
 
 Our contribution is to combine the advantages of each of the above methods.
@@ -170,12 +170,13 @@ and stopping as soon as we arrive at a nonzero polynomial $f_k(\epsilon_1. \ldot
 To compute the coefficients of a given $f_k$, we temporarily view the infinitesimals $\epsilon_i$ as integer variables and use a black box function for $f(x)$ to evaluate
 $f_k(\epsilon_1, \ldots, \epsilon_k)$ with $(\epsilon_1, \ldots, \epsilon_k)$ replaced with all $\binom{k+d}{k}$ nonnegative integer tuples satisfying $\epsilon_1 + \cdots + \epsilon_k \le d$
 as discussed in \cite{neidinger2009multivariable} and \autoref{polynomial}.
-If any values are nonzero, we use multivariate polynomial interpolation to recover the $\binom{k+d}{k}$ coefficients of $f_k$, and return the sign of the least infinitesimal nonzero term.
+If any values are nonzero, we use multivariate polynomial interpolation to recover the $\binom{k+d}{k}$ coefficients of $f_k$ and return the sign of the least infinitesimal nonzero term.
 Note that we have replaced the $\binom{n+d}{n}$ coefficients of Yap's scheme with $\binom{k+d}{k}$ coefficients.
 
 We show that the computational cost is dominated by the first perturbation term even for arbitrarily degenerate input, as long as the range $Y$ of the random generator
-satisfies $d^3 \ll |Y|$.  In other words, our scheme has the same cost as the simple linear scheme.  To see this, note that $f_k$ can be zero only if $f(x + y_1), \ldots, f(x + y_k)$ are zero,
-by setting one $\epsilon_j$ to one and the others to zero.  Thus, if the polynomial predicate $f(x)$ is not identically zero, the Schwartz-Zippel lemma gives
+satisfies $d^3 \ll |Y|$.  In other words, our scheme has the same cost as the simple linear scheme.  To see this, note that if $f_k$ is zero, setting one $\epsilon_j$ to one and the others to zero
+shows that $f(x + y_1), \ldots, f(x + y_k)$ are zero.
+Thus, if the polynomial predicate $f(x)$ is not identically zero, the Schwartz-Zippel lemma gives
 \begin{linenomath*}
 $$\Pr(f_k = 0) \le \frac{d^k}{|Y|^k}.$$
 \end{linenomath*}
@@ -190,7 +191,7 @@ interpolation at level $k$ is $O\left(d \binom{d + k}{k}^2\right)$ (see \autoref
 \end{linenomath*}
 where we need $d^3 < |Y|$ to guarantee a convergent geometric series.  In practice, $d^3 \ll |Y|$; for $|Y| = 2^{32}$ terms with $k \ge 2$ contribute less than $1/4000$th of the expected cost
 for polynomials up to degree $100$.  We emphasize that this bound is independent of the input $x$, and therefore holds even for maliciously chosen input data.  However, we do
-assume that $\rand$ behaves as a strong random source, and in particular that the polynomials $f(x)$ are not chosen with knowledge of $\rand$.\footnote{Though maliciously
+assume that $\rand$ behaves as a strong random source and, in particular, that the polynomials $f(x)$ are not chosen with knowledge of $\rand$.\footnote{Though maliciously
 choosing $f(x)$ so that $f_1 = f_2 = 0$ is quite useful for unit testing purposes.}
 
 Thus, our method has the same complexity as the deterministic linear scheme, but like Yap's scheme and the randomized linear scheme it works on arbitrary polynomials.  As in the
@@ -208,14 +209,14 @@ unconditionally correctly handle the few remaining degeneracies.
 \section{Other approaches}
 
 Since the original introduction of the symbolic perturbation method several alternative schemes have been introduced for treating degeneracies in numerical algorithms.
-All of these approaches seem to require some algorithm or predicate specific treatment, which complicate the process of developing and especially testing new algorithms.
+All of these approaches seem to require some algorithm or predicate specific treatment, which complicates the process of developing and especially testing new algorithms.
 However, the algorithm specific approaches may be superior to a general approach such as ours when they apply, either by avoiding the slowdown of occasional exact arithmetic
 entirely by treating degenerate cases faster (our approach introduces a slowdown of $O(d)$ for the first perturbation level over exact evaluation), or by computing the true exact
 answer rather than a perturbed answer.
 
-Perhaps the most natural approach to treating degeneracies is to manually extend the definition of $G(x)$ to degenerate cases, and write algorithms which treat these cases
+Perhaps the most natural approach to treating degeneracies is to manually extend the definition of $G(x)$ to degenerate cases and write algorithms which treat these cases
 directly.  For example, in an arrangement of lines, intersections of three or more lines can be detected and represented as higher degree vertices in the arrangement graph.
-Burnikel et al.\ \cite{burnikel1994degeneracy} argue that perturbation is slower and more complicated to implement than simply handling degeneracies directly, and presents two degeneracy-aware
+Burnikel et al.\ \cite{burnikel1994degeneracy} argue that perturbation is slower and more complicated to implement than simply handling degeneracies directly and present two degeneracy-aware
 algorithms as evidence.  We believe our method reduces the implementation complexity of symbolic perturbation, but agree that a tailored algorithm is faster on highly
 degenerate input.  Unlike the deterministic symbolic perturbation schemes, an algorithm built on our method will treat fully degenerate data as purely random data, in particular
 avoiding the worst case behavior of convex hull discussed in \cite{burnikel1994degeneracy}.
@@ -231,7 +232,7 @@ no algorithm specific analysis.
 
 Devillers et al.\ \cite{devillers2012qualitative} present \emph{qualitative symbolic perturbation}, which replaces the algebraic perturbations used in previous perturbation schemes (and ours)
 by a sequence of carefully chosen, geometrically meaningful perturbations.  Their approach replaces the $O(d)$ slowdown of the first perturbation level with a predicate dependent
-slowdown, and may be faster than our method when it applies.  However, the geometric perturbations and the analysis of their effect on the predicates must be performed separately for each
+slowdown and may be faster than our method when it applies.  However, the geometric perturbations and the analysis of their effect on the predicates must be performed separately for each
 predicate, which complicates the design of algorithms and is a likely source of complexity during implementation and debugging.  Moreover, since the perturbations depend on the
 algorithm, chaining two algorithms together requires adjusting the perturbations to be compatible.  Their approach shares with ours (and indeed
 with Yap's) the idea of a sequence of increasingly small perturbations, applied one at a time until a nonsingular result is obtained.
@@ -253,7 +254,7 @@ paper source at \url{https://github.com/otherlab/perturb}.
 
 For simplicity and speed, our implementation quantizes all input coordinates to the integer range $[-2^{53},2^{53}]$, the largest range of integers exactly representable in
 double precision.  This allows use of fast interval arithmetic filters \cite{bronnimann2001interval}, falling back to exact integer evaluation using GMP if the filter fails \cite{granlund2012gmp},
-falling back to symbolic perturbation if the exact answer is zero.  The polynomial is provided as a black box evaluation routine (see \verb+exact/perturb.h+ in the code).  For multivariate
+and falling back to symbolic perturbation if the exact answer is zero.  The polynomial is provided as a black box evaluation routine (see \verb+exact/perturb.h+ in the code).  For multivariate
 interpolation we evaluate $f_k(\epsilon_1, \ldots, \epsilon_k)$ on our fixed set of $(\epsilon_1, \ldots, \epsilon_k)$ tuples, use the algorithm of \cite{neidinger2009multivariable}
 to map into the Newton basis, then expand into the monomial basis.  It is possible to perform all computations required for polynomial interpolation using integers only; see \autoref{polynomial}.
 To avoid a significant slowdown due to memory allocation inside GMP, the final version was written using manual memory allocation and the low level interface to GMP.
@@ -286,7 +287,7 @@ In a correct geometric algorithm, no polynomial passed to symbolic perturbation 
 ``Is the triangle $(x_7,x_7,x_7)$ counterclockwise?''.  However, it is convenient for debugging to detect these cases and produce useful output.  Therefore,
 if both $f_1$ and $f_2$ are identically zero, our code pauses to run a randomized polynomial identity check \cite{schwartz1980fast} and throws an exception if a nonzero is not found.
 The identity test evaluates the polynomial on 20 random points; this produces a false positive with probability under $10^{-171}$ (sufficient for the
-lifetime of the code), and always reports failure for a truly zero polynomial.  The check has negligible effect on overall cost, since usually $f_1 \ne 0$.
+lifetime of the code) and always reports failure for a truly zero polynomial.  The check has negligible effect on overall cost, since usually $f_1 \ne 0$.
 
 For Delaunay triangulation, we use the partially randomized incremental construction of \cite{amenta2003incremental}.  Our implementation is $O(n \log n)$ for arbitrarily degenerate input,
 and happily computes a random but valid Delaunay triangulation if all points are at the origin.  For Boolean operations, we find intersections using axis-aligned bounding box hierarchies
@@ -307,7 +308,7 @@ for Yap's scheme due to the worst case exponential blowup in the number of terms
 \put(-115,65){{\small slope $1.070$}}  % random
 \end{picture}
 \cprotect\caption{Left: Delaunay triangulation of 2000 normally distributed points.  Right: computation time for Delaunay triangulation of (green, lower) $n$ normally distributed points
-and (blue, upper) $n$ copies of the origin.  The fully degenerate case ranges from $13.1$ to $15.5$ times as slow as the random case, due to falling back from interval
+and (blue, upper) $n$ copies of the origin.  The fully degenerate case ranges from $13.1$ to $15.5$ times as slow as the random case due to falling back from interval
 arithmetic filters to integer computation and symbolic perturbation.  To reproduce these figures, run \verb+examples delaunay --count 2000 --plot 1+ and
 \verb+examples delaunay --count 1000000+.}
 \label{fig:delaunay}
@@ -398,7 +399,7 @@ Since $\Delta \binom{x}{n} = \binom{x}{n-1}$ we have
 \end{linenomath*}
 For the multivariate case, Neidinger \cite{neidinger2009multivariable} provides an elegant generalization of the univariate divided difference algorithm when the polynomial is
 evaluated on an ``easy corner'' of points, which includes the $0 \le \epsilon_i$, $\epsilon_1 + \cdots + \epsilon_k \le d$ set that we use.  All intermediate results
-in their algorithm are multivariate divided differences, and are therefore integral by the above argument.  They discuss only interpolation into the multivariate Newton basis
+in their algorithm are multivariate divided differences and are therefore integral by the above argument.  They discuss only interpolation into the multivariate Newton basis
 consisting of polynomials such as
 \begin{linenomath*}
 $$\prod_i x_i(x_i-1)\cdots(x_i-(n_i-1))$$
