@@ -3,10 +3,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[         0,          0]
-NotebookDataLength[     34268,        757]
-NotebookOptionsPosition[     33225,        716]
-NotebookOutlinePosition[     33581,        732]
-CellTagsIndexPosition[     33538,        729]
+NotebookDataLength[     36705,        837]
+NotebookOptionsPosition[     35507,        791]
+NotebookOutlinePosition[     35863,        807]
+CellTagsIndexPosition[     35820,        804]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -712,6 +712,81 @@ Cell[BoxData[
    3.584451730189386*^9}, 3.5844523788374*^9, 3.584453059682087*^9, 
    3.584467097642812*^9, {3.584724578533785*^9, 3.584724607735303*^9}, {
    3.584837916492012*^9, 3.58483792513078*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"Expand", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"A", "^", "2"}], "+", 
+      RowBox[{
+       RowBox[{"B1", "^", "2"}], " ", "C1"}], "-", 
+      RowBox[{
+       RowBox[{"B2", "^", "2"}], " ", "C2"}]}], ")"}], "^", "2"}], "-", 
+   RowBox[{"4", 
+    RowBox[{"A", "^", "2"}], " ", 
+    RowBox[{"B1", "^", "2"}], " ", "C1"}]}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Expand", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"A", "^", "2"}], "-", 
+      RowBox[{
+       RowBox[{"B1", "^", "2"}], " ", "C1"}], "-", 
+      RowBox[{
+       RowBox[{"B2", "^", "2"}], " ", "C2"}]}], ")"}], "^", "2"}], "-", 
+   RowBox[{"4", " ", 
+    RowBox[{"B1", "^", "2"}], " ", 
+    RowBox[{"B2", "^", "2"}], " ", "C1", " ", "C2"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.584887650508789*^9, 3.584887718516507*^9}, {
+  3.584887825499642*^9, 3.584887851609872*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  SuperscriptBox["A", "4"], "-", 
+  RowBox[{"2", " ", 
+   SuperscriptBox["A", "2"], " ", 
+   SuperscriptBox["B1", "2"], " ", "C1"}], "+", 
+  RowBox[{
+   SuperscriptBox["B1", "4"], " ", 
+   SuperscriptBox["C1", "2"]}], "-", 
+  RowBox[{"2", " ", 
+   SuperscriptBox["A", "2"], " ", 
+   SuperscriptBox["B2", "2"], " ", "C2"}], "-", 
+  RowBox[{"2", " ", 
+   SuperscriptBox["B1", "2"], " ", 
+   SuperscriptBox["B2", "2"], " ", "C1", " ", "C2"}], "+", 
+  RowBox[{
+   SuperscriptBox["B2", "4"], " ", 
+   SuperscriptBox["C2", "2"]}]}]], "Output",
+ CellChangeTimes->{{3.584887676212619*^9, 3.584887718904948*^9}, 
+   3.584887852092106*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  SuperscriptBox["A", "4"], "-", 
+  RowBox[{"2", " ", 
+   SuperscriptBox["A", "2"], " ", 
+   SuperscriptBox["B1", "2"], " ", "C1"}], "+", 
+  RowBox[{
+   SuperscriptBox["B1", "4"], " ", 
+   SuperscriptBox["C1", "2"]}], "-", 
+  RowBox[{"2", " ", 
+   SuperscriptBox["A", "2"], " ", 
+   SuperscriptBox["B2", "2"], " ", "C2"}], "-", 
+  RowBox[{"2", " ", 
+   SuperscriptBox["B1", "2"], " ", 
+   SuperscriptBox["B2", "2"], " ", "C1", " ", "C2"}], "+", 
+  RowBox[{
+   SuperscriptBox["B2", "4"], " ", 
+   SuperscriptBox["C2", "2"]}]}]], "Output",
+ CellChangeTimes->{{3.584887676212619*^9, 3.584887718904948*^9}, 
+   3.584887852093534*^9}]
 }, Open  ]]
 },
 WindowSize->{1013, 566},
@@ -751,6 +826,11 @@ Cell[30301, 650, 1197, 16, 27, "Output"]
 Cell[CellGroupData[{
 Cell[31535, 671, 974, 23, 88, "Input"],
 Cell[32512, 696, 697, 17, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[33246, 718, 933, 28, 43, "Input"],
+Cell[34182, 748, 653, 19, 30, "Output"],
+Cell[34838, 769, 653, 19, 30, "Output"]
 }, Open  ]]
 }
 ]
