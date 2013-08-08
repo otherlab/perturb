@@ -116,9 +116,9 @@ coordinates used by $f$, which is worst case exponential in the degree of the pr
 number of coefficients before finding a nonzero.
 
 {\bf Emiris and Canny's deterministic linear scheme} \cite{emiris1992efficient} arranges the input coordinates into $n$ $k$-vectors based on the dimension
-$k$ of the geometric space as $x_{i,j}$, $1 \le i \le n$, $1 \le j \le k$.  They introduce a single infinitesimal $\epsilon$ and write
+$k$ of the geometric space as $x_{a,b}$, $1 \le a \le n$, $1 \le b \le k$.  They introduce a single infinitesimal $\epsilon$ and write
 \begin{linenomath*}
-$$\delta_{i,j} = \epsilon (i^j \operatorname{mod} p)$$
+$$\delta_{a,b} = \epsilon (a^b \operatorname{mod} p)$$
 \end{linenomath*}
 where $p > n$ is a prime.  They show that this scheme produces a nonzero sign for simplex orientation tests up to dimension $k$ and for
 the incircle tests used in Delaunay triangulation.  However, as discussed in \cite{seidel1998nature}, extending this technique to other predicates
@@ -145,8 +145,8 @@ Our contribution is to combine the advantages of each of the above methods.
 
 \section{A deterministic pseudorandom perturbation}
 
-Our approach is to introduce an infinite sequence of infinitesimals $\epsilon_1, \epsilon_2, \ldots$, choose deterministic pseudorandom coefficients $y_1, y_2, \ldots$
-with $y_{k,i} = \rand(k,i)$, and set
+Our approach is to introduce an infinite sequence of infinitesimals $\epsilon_1, \epsilon_2, \ldots$, choose deterministic pseudorandom vectors $y_1, y_2, \ldots$
+with $y_{k,i} = \rand(k,i)$ for $1 \le k < \infty, 1 \le i \le n$, and set
 \begin{linenomath*}
 $$\delta = \epsilon_1 y_1 + \epsilon_2 y_2 + \cdots.$$
 \end{linenomath*}
@@ -171,10 +171,11 @@ To compute the coefficients of a given $f_k$, we temporarily view the infinitesi
 $f_k(\epsilon_1, \ldots, \epsilon_k)$ with $(\epsilon_1, \ldots, \epsilon_k)$ replaced with all $\binom{k+d}{k}$ nonnegative integer tuples satisfying $\epsilon_1 + \cdots + \epsilon_k \le d$
 as discussed in \cite{neidinger2009multivariable} and \autoref{polynomial}.
 If any values are nonzero, we use multivariate polynomial interpolation to recover the $\binom{k+d}{k}$ coefficients of $f_k$, and return the sign of the least infinitesimal nonzero term.
+Note that we have replaced the $\binom{n+d}{n}$ coefficients of Yap's scheme with $\binom{k+d}{k}$ coefficients.
 
 We show that the computational cost is dominated by the first perturbation term even for arbitrarily degenerate input, as long as the range $Y$ of the random generator
 satisfies $d^3 \ll |Y|$.  In other words, our scheme has the same cost as the simple linear scheme.  To see this, note that $f_k$ can be zero only if $f(x + y_1), \ldots, f(x + y_k)$ are zero,
-by setting one $\epsilon_i$ to one and the others to zero.  Thus, if the polynomial predicate $f(x)$ is not identically zero, the Schwartz-Zippel lemma gives
+by setting one $\epsilon_j$ to one and the others to zero.  Thus, if the polynomial predicate $f(x)$ is not identically zero, the Schwartz-Zippel lemma gives
 \begin{linenomath*}
 $$\Pr(f_k = 0) \le \frac{d^k}{|Y|^k}.$$
 \end{linenomath*}
@@ -209,10 +210,10 @@ unconditionally correctly handle the few remaining degeneracies.
 Since the original introduction of the symbolic perturbation method several alternative schemes have been introduced for treating degeneracies in numerical algorithms.
 All of these approaches seem to require some algorithm or predicate specific treatment, which complicate the process of developing and especially testing new algorithms.
 However, the algorithm specific approaches may be superior to a general approach such as ours when they apply, either by avoiding the slowdown of occasional exact arithmetic
-entirely, by treating degenerate cases faster (our approach introduces a slowdown of $O(d)$ for the first perturbation level over exact evaluation), or by computing the true exact
+entirely by treating degenerate cases faster (our approach introduces a slowdown of $O(d)$ for the first perturbation level over exact evaluation), or by computing the true exact
 answer rather than a perturbed answer.
 
-Perhaps the most natural approach to treating to degeneracies is to manually extend the definition of $G(x)$ to degenerate cases, and write algorithms which treat these cases
+Perhaps the most natural approach to treating degeneracies is to manually extend the definition of $G(x)$ to degenerate cases, and write algorithms which treat these cases
 directly.  For example, in an arrangement of lines, intersections of three or more lines can be detected and represented as higher degree vertices in the arrangement graph.
 Burnikel et al.\ \cite{burnikel1994degeneracy} argue that perturbation is slower and more complicated to implement than simply handling degeneracies directly, and presents two degeneracy-aware
 algorithms as evidence.  We believe our method reduces the implementation complexity of symbolic perturbation, but agree that a tailored algorithm is faster on highly
@@ -264,8 +265,8 @@ larger than $g_k$, but it is easy to detect this case and throw an exception as 
 rule for computing limits.  Finally, the ratio is rounded to the nearest integer.  We can similarly compute $\sqrt{f(x)/g(x)}$ by evaluating the limit of the ratio as a rational and
 taking an exactly rounded square root.
 
-We emphasize that these perturbed constructions are guaranteed to be within distance $1/2$ of the true answer, where the true answer is consistent with the rest of the algorithm and
-obeys any geometric invariants that apply in the exact case.  For example, a constructed union of a convex polygon with itself will be within distance $1/2$ of the input, and in
+We emphasize that these perturbed constructions are guaranteed to be within $L_0$ distance $1/2$ of the true answer, where the true answer is consistent with the rest of the algorithm and
+obeys any geometric invariants that apply in the exact case.  For example, a constructed union of a convex polygon with itself will be within $L_0$ distance $1/2$ of the input, and in
 particular will avoid all but extremely tiny foldovers that might result from performing constructions with floating point arithmetic when an algorithm completes.
 Moreover, since the maximum error is known, they can be fed back into the same algorithm as tight interval bounds without fear of introducing inconsistencies.  Our
 circular arc Boolean code makes use of this to perform more accurate interval-based filtering.  For example, when comparing $y$ coordinates of different intersections of circles,
@@ -281,7 +282,7 @@ correctness of the filter and the correctness of the predicate, which is importa
 Although our currently implemented algorithms are serial, our symbolic perturbation scheme can easily be used in parallel algorithms since each predicate evaluation is deterministic.
 However, the dramatic slowdown between interval filtering and perturbed exact evaluation might interfere with load balancing at very high levels of parallelism, such as on a GPU.
 
-In a correct geometric algorithm, no polynomial passed to symbolic perturbation will be identical zero; this would correspond to a fundamentally degenerate question such as
+In a correct geometric algorithm, no polynomial passed to symbolic perturbation will be identically zero; this would correspond to a fundamentally degenerate question such as
 ``Is the triangle $(x_7,x_7,x_7)$ counterclockwise?''.  However, it is convenient for debugging to detect these cases and produce useful output.  Therefore,
 if both $f_1$ and $f_2$ are identically zero, our code pauses to run a randomized polynomial identity check \cite{schwartz1980fast} and throws an exception if a nonzero is not found.
 The identity test evaluates the polynomial on 20 random points; this produces a false positive with probability under $10^{-171}$ (sufficient for the
@@ -378,7 +379,7 @@ The clean $LU$ factorization was given in \cite{olver2006multivariate}, though w
 The first half of this factorization is the classical divided difference algorithm to convert values $f(x_0), \ldots, f(x_k)$ into the coefficients of $f$ in the Newton
 basis.  The second half expands from the Newton basis down to monomials.  In our case, we have $x_k = k$, so all of the ratios in each bidiagonal matrix have the same denominator.
 In particular, we can clear fractions by multiplying the inverse by $d!$ where $d$ is the degree of $f$, after which all computations can be performed in integers.  Alternatively,
-we can use the fact while the inverse of the Vandermonde matrix is not integer, both our polynomial values and the coefficients of the polynomials in both Newton and monomial basis
+we can use the fact that while the inverse of the Vandermonde matrix is not integral, both our polynomial values and the coefficients of the polynomials in both Newton and monomial basis
 are integers.  It turns out that in this case all intermediate results in the divided difference algorithm are integers as well.  To show this, we must prove that the $k$th forward
 difference $\Delta^k f(x)$ of an integer polynomial is divisible by $k!$.  We use the following argument due to Qiaochu Yuan\footnote{\url{http://math.stackexchange.com/questions/413600}}.
 Since the transformation to and from the monomial basis to Newton basis (the second half of (\ref{vandermonde})) is integral, it suffices to check $k! \mid \Delta^k f(x)$ for an
