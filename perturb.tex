@@ -87,31 +87,31 @@ nonzero monomial coefficient of this polynomial.
 We distinguish between three existing symbolic perturbation schemes that can be expressed in this framework, and discuss their advantages
 and disadvantages.
 
-Yap's deterministic scheme \cite{yap1990symbolic} introduces one infinitesimal $\epsilon_i$ per input coordinate $x_i$, and lets $\delta_i = \epsilon_i$.  This
+{\bf Yap's deterministic scheme} \cite{yap1990symbolic} introduces one infinitesimal $\epsilon_i$ per input coordinate $x_i$, and lets $\delta_i = \epsilon_i$.  This
 corresponds to evaluating $f(x_1+\epsilon_1, x_2+\epsilon_2, \ldots)$.  Since each coordinate has its own infinitesimal, $f(x+\delta)$ has at least
 one nonzero monomial unless $f$ is identically zero, so the scheme produces a nonzero sign for all nonzero polynomials.  Unfortunately, a degree $d$ polynomial
 $f$ results in an $f(x+\delta) \in \R[\epsilon_1,\epsilon_2, \ldots]$ with up to $\binom{n + d}{n}$ monomial terms where $n$ is the number of input
-coordinates used by $f$, which is worst case exponential in the degree in the predicate.  For extremely degenerate input, we may need to evaluate a large
+coordinates used by $f$, which is worst case exponential in the degree of the predicate.  For extremely degenerate input, we may need to evaluate a large
 number of coefficients before finding a nonzero.
 
-Emiris and Canny's deterministic linear scheme \cite{emiris1992efficient} groups the input coordinates into $n$ $k$-vectors based on the dimension
-$k$ of the geometric space as $x_{i,j}$, $1 \le i \le n$, $1 \le j \le k$, introduces a single infinitesimal $\epsilon$, and writes
+{\bf Emiris and Canny's deterministic linear scheme} \cite{emiris1992efficient} arranges the input coordinates into $n$ $k$-vectors based on the dimension
+$k$ of the geometric space as $x_{i,j}$, $1 \le i \le n$, $1 \le j \le k$.  They introduce a single infinitesimal $\epsilon$ and write
 $$\delta_{i,j} = \epsilon (i^j \operatorname{mod} p)$$
 where $p > n$ is a prime.  They show that this scheme produces a nonzero sign for simplex orientation tests up to dimension $k$ and for
 the incircle tests used in Delaunay triangulation.  However, as discussed in \cite{seidel1998nature}, extending this technique to other predicates
 is difficult.
 
-Emiris and Canny's randomized linear scheme \cite{emiris1995general} again introduces a single infinitesimal $\epsilon$, but now sets
+In addition, as noted in \cite{burnikel1994degeneracy}, a fixed deterministic perturbation may turn highly degenerate input into worst case behavior for algorithms
+like convex hull: ignoring the $\operatorname{mod} p$, the deterministic linear scheme produces a convex hull of size $n^{\lceil d/2 \rceil}$ when all input
+points are at the origin.  We believe this also applies to Yap's scheme, and may arise with the modular deterministic linear scheme.
+
+{\bf Emiris and Canny's randomized linear scheme} \cite{emiris1995general} again introduces a single infinitesimal $\epsilon$, but now sets
 $\delta_i = \epsilon y_i$ using random coefficients $y_i$ chosen from some space $Y$.  By the Schwartz-Zippel lemma \cite{schwartz1980fast}, $f(x+\delta)$
 will be nonvanishing as a polynomial in $\epsilon$ with probability at least $1 - d/|Y|$, where $d$ is the degree of the polynomial.  Unfortunately, what we
 actually need is for \emph{all} polynomials evaluated during the algorithm to not vanish, which reduces the probability of success to
 $(1 - d/|Y|)^T$ where $T$ is the number of branches required.  Emiris and Canny show that their randomized scheme is very efficient in the
 algebraic computation model, but suffers from a worst case cubic slowdown in the bit computation model due to the large $|Y|$ required.  For some algorithms
 it is possible to reduce this slowdown by restarting only part of the algorithm, but this adds significant complexity (in the authors' experience).
-
-In addition, as noted in \cite{burnikel1994degeneracy}, a fixed deterministic perturbation may turn highly degenerate input into worst case behavior for algorithms
-like convex hull: ignoring the $\operatorname{mod} p$, the deterministic linear scheme produces a convex hull of size $n^{\lceil d/2 \rceil}$ when all input
-points are at the origin.  We believe this also applies to Yap's scheme, and may arise with the modular deterministic linear scheme.
 
 To summarize: Yap's deterministic scheme and the randomized linear scheme work for arbitrary polynomial predicates, but suffer from unfortunate performance penalties.
 The randomized linear scheme occasionally requires a restart of all or part of the computation, adding extra complexity to the surrounding algorithm
