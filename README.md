@@ -16,14 +16,15 @@ To build the paper, install and run scons or do
 
 To rerun the examples and benchmarks, first install and build `other/core` following the instructions
 at https://github.com/otherlab/core.  You may need to check out the `exact` branch to get symbolic
-perturbation functionality.  Make sure the `config.py` file contains the line
+perturbation functionality.  Make sure the `config.py` file in `core` or `other` contains the lines
 
+    import os
     PREFIX = os.environ['OTHER']+'/install/$type'
 
 and build the C++ helper routines used by the benchmarks via
 
     cd helper
-    $OTHER/core/build/setup
+    $OTHER/core/build/setup # Ignore the __init__.py warning
     scons
 
 Example visualization and benchmarks are then available through the `example` script.  To reproduce
